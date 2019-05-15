@@ -11,30 +11,32 @@ import io from 'socket.io-client';
 let socket = io.connect("http://localhost:5000");
 
 class Game extends React.Component {
-
-    state = {
-        // acceleration: 0.025,
-        game_data: {
+    constructor(props){
+        super(props);
+        this.game_data = {
+            canvas: {
+                width: 1000,
+                height: 1000
+            },
             background: {
                 size: {
-                    x: 2000,
+                    x: 2300,
                     y: 1000,
-                    sprites: 0
-                }
+                },
+                sprites: 0
             },
-            ships: {
-                rogue:{
+            ships:{
+                fast: {
                     size: 50,
                     sprites: 0
                 }
             }
-        },
-
-        players: {
+        }
+        this.players = {
             0: {
                 angle: 0,
                 pos: new Vector2(50, 100),
-                velocity: new Vector2(50, 100),
+                velocity: new Vector2(0, 0),
                 acceleration: 3
             },
             1: {
@@ -55,7 +57,16 @@ class Game extends React.Component {
                 velocity: new Vector2(50, 100),
                 acceleration: 3
             }
-        },
+        }
+        this.mouse = new Vector2(50, 100);
+        this.change = false;
+    }
+
+    state = {
+        // acceleration: 0.025,
+
+
+
 
         player: {
             angle: 0,
@@ -83,103 +94,115 @@ class Game extends React.Component {
     // .catch(err => console.log(err));
 
     movePlayer = () => {
-        let pos = this.state.player.pos.clone();
-        let velocity = this.state.player.velocity.clone();
-        let newPlayer = {
-            pos,
-            velocity,
-            angle: this.state.player.angle
-        }
 
-        // let newPlayer = Object.assign(Object.create(Object.getPrototypeOf(this.state.player)), this.state.player)
-        let difference = this.state.mouse.clone();
-        if (this.state.change){
-            difference.sub(newPlayer.pos);
-            newPlayer.velocity = difference.clone();
-            newPlayer.velocity.normalize();
-            newPlayer.pos.add(newPlayer.velocity.multiplyScalar(3));
+        // let this.players[0] = Object.assign(Object.create(Object.getPrototypeOf(this.players[0])), this.players[0])
+        let difference = this.mouse.clone();
+        if (this.change){
+            difference.sub(this.players[0].pos);
+            this.players[0].velocity = difference.clone();
+            this.players[0].velocity.normalize();
+            this.players[0].pos.add(this.players[0].velocity.multiplyScalar(3));
             let newAngle = Math.atan2(difference.y, difference.x);
-            newPlayer.angle = newAngle;
-            if (newPlayer.pos.x < 0) {
-                newPlayer.pos.x = 0
+            this.players[0].angle = newAngle;
+            if (this.players[0].pos.x < 0) {
+                this.players[0].pos.x = 0
             }
-            if (newPlayer.pos.y < 0) {
-                newPlayer.pos.y = 0
+            if (this.players[0].pos.y < 0) {
+                this.players[0].pos.y = 0
             }
 
-            if (newPlayer.pos.x > 2000) {
-                newPlayer.pos.x = 2000
+            if (this.players[0].pos.x > this.game_data.background.size.x) {
+                this.players[0].pos.x = this.game_data.background.size.x;
             }
-            if (newPlayer.pos.y > 1000) {
-                newPlayer.pos.y = 1000
+            if (this.players[0].pos.y > this.game_data.background.size.y) {
+                this.players[0].pos.y = this.game_data.background.size.y;
             }
-            this.setState({change: false, player: newPlayer});
+            this.change = false;
         }
          else{
-            newPlayer.pos.add(newPlayer.velocity);
-            if (newPlayer.pos.x < 0) {
-                newPlayer.pos.x = 0
+            this.players[0].pos.add(this.players[0].velocity);
+            if (this.players[0].pos.x < 0) {
+                this.players[0].pos.x = 0
             }
-            if (newPlayer.pos.y < 0) {
-                newPlayer.pos.y = 0
+            if (this.players[0].pos.y < 0) {
+                this.players[0].pos.y = 0
             }
 
-            if (newPlayer.pos.x > 2000) {
-                newPlayer.pos.x = 2000
+            if (this.players[0].pos.x > this.game_data.background.size.x) {
+                this.players[0].pos.x = this.game_data.background.size.x;
             }
-            if (newPlayer.pos.y > 1000) {
-                newPlayer.pos.y = 1000
+            if (this.players[0].pos.y > this.game_data.background.size.y) {
+                this.players[0].pos.y = this.game_data.background.size.y;
             }
-            this.setState({player: newPlayer});
         }
-        
-
     }
 
     onMouseMove = (e) => {
-        let leftCornerx = Math.min(Math.max(0, this.state.player.pos.x-250) , 1500);
-        let leftCornery = Math.min(Math.max(0, this.state.player.pos.y-250), 500);
+        let halfx = this.game_data.canvas.width / 2;
+        let halfy = this.game_data.canvas.height / 2;
+        let leftCornerx = Math.min(Math.max(0, this.players[0].pos.x - halfx), this.game_data.background.size.x - this.game_data.canvas.width);
+        let leftCornery = Math.min(Math.max(0, this.players[0].pos.y - halfy), this.game_data.background.size.y - this.game_data.canvas.height);
         let m = new Vector2(e.nativeEvent.offsetX+leftCornerx, e.nativeEvent.offsetY+leftCornery);
         console.log(m)
-        this.setState({ change: true, mouse: m });
-        socket.emit('state', this.state);
+        this.mouse = m;
+        this.change = true;
+        socket.emit('state', this.players[0]);
     }
 
     draw = () => {
+        let halfx = this.game_data.canvas.width / 2;
+        let halfy = this.game_data.canvas.height / 2;
         const ctx = this.refs.canvas.getContext("2d");
         ctx.fillStyle = "green";
-        ctx.fillRect(0, 0, this.refs.canvas.width, this.refs.canvas.height);
-        ctx.drawImage(this.state.map, Math.max(this.state.player.pos.x - 250, 0), Math.max(this.state.player.pos.y - 250, 0), 500, 500, 0, 0, 500, 500);
-        if (this.state.image !== 0){
+        ctx.fillRect(0, 0, this.game_data.canvas.width, this.game_data.canvas.height);
+        let dx;
+        let dy;
+        if (this.players[0].pos.x < halfx) {
+            dx = 0
+        } else if (this.players[0].pos.x > this.game_data.background.size.x - halfx) {
+            dx = this.game_data.background.size.x - this.game_data.canvas.width;
+        } else {
+            dx = this.players[0].pos.x - halfx;
+        }
+
+        if (this.players[0].pos.y < halfy) {
+            dy = 0
+        } else if (this.players[0].pos.y > this.game_data.background.size.y - halfy) {
+            dy = this.game_data.background.size.y - this.game_data.canvas.height;
+        } else {
+            dy = this.players[0].pos.y - halfy;
+        }
+
+        ctx.drawImage(this.game_data.background.sprites, dx, dy, this.game_data.canvas.width, this.game_data.canvas.height, 0, 0, this.game_data.canvas.width, this.game_data.canvas.height);
+        if (this.game_data.ships.fast.sprites !== 0){
             
             let leftCornerx = 0;
-            let leftCornery = 0
+            let leftCornery = 0;
 
             
-            if (this.state.player.pos.x > 2000 - 250) {
-                leftCornerx = this.state.player.pos.x - 1500;
-            }  else if (this.state.player.pos.x < 250) {
-                leftCornerx = this.state.player.pos.x;
+            if (this.players[0].pos.x > this.game_data.background.size.x - halfx) {
+                leftCornerx = this.players[0].pos.x - (this.game_data.background.size.x - this.game_data.canvas.width);
+            }  else if (this.players[0].pos.x < halfx) {
+                leftCornerx = this.players[0].pos.x;
             } else {
-                leftCornerx = 250;
+                leftCornerx = halfx;
             }
 
-            if (this.state.player.pos.y > 1000 - 250) {
-                leftCornery = this.state.player.pos.y - 500;
-            } else if (this.state.player.pos.y < 250) {
-                leftCornery = this.state.player.pos.y;
+            if (this.players[0].pos.y > this.game_data.background.size.y - halfy) {
+                leftCornery = this.players[0].pos.y - (this.game_data.background.size.y - this.game_data.canvas.height);
+            } else if (this.players[0].pos.y < halfy) {
+                leftCornery = this.players[0].pos.y;
             } else {
-                leftCornery = 250;
+                leftCornery = halfy;
             }
-
             
             ctx.save();
             ctx.translate(leftCornerx, leftCornery);
 
-            ctx.rotate((this.state.player.angle) + 90 * (Math.PI / 180) );
+            ctx.rotate((this.players[0].angle) + 90 * (Math.PI / 180) );
             ctx.translate(-25, -25);
 
-            ctx.drawImage(this.state.image, 0, 0, 50,50 )
+            ctx.drawImage(this.game_data.ships.fast.sprites, 0, 0, 50,50 )
             ctx.restore();  
   
         }
@@ -189,20 +212,21 @@ class Game extends React.Component {
         this.movePlayer();
 
 
-        // console.log(this.state.renderResponse);
+        // console.log(this.players[0].pos);
         this.draw();
     }
 
     loadCharacter = (img) => {
-        this.setState({image: img})
+        this.game_data.ships.fast.sprites = img;
+        // this.setState({image: img})
     }
 
     loadMap = (img) => {
-        this.setState({map: img});
+        this.game_data.background.sprites = img;
     }
 
     onMouseEnter = (e) => {
-        this.setState({ change: true });
+        this.change = true;
     }
 
     onMouseLeave = (e) => {
@@ -227,7 +251,6 @@ class Game extends React.Component {
             .then(res => res.json())
             .then(data => this.setState({ renderResponse: data }))
             .catch(err => console.log(err));
-        console.log("HELLO");
 
 
     }
@@ -238,7 +261,7 @@ class Game extends React.Component {
     render(){
         return (
             <div className="game">
-                <canvas ref="canvas" width={500} height={500} onMouseMove={this.onMouseMove} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}/>
+                <canvas ref="canvas" width={this.game_data.canvas.width} height={this.game_data.canvas.height} onMouseMove={this.onMouseMove} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}/>
                 <p>{this.state.renderResponse.express}</p>
             </div>
         )
