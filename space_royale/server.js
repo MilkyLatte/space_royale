@@ -229,6 +229,10 @@ io.on('connection', function(socket){
         let v = master.games[GAMEID].players[playerID].velocity.clone();
         let angle = master.games[GAMEID].players[playerID].angle;
         
+        var newH = 25 / Math.cos(angle);
+
+        p.x += 25 * Math.cos(angle) - 15 * Math.sin(angle);
+        p.y += 15 * Math.cos(angle) + 25 * Math.sin(angle);
         let bullet = new Bullet(
           p,
           v,
