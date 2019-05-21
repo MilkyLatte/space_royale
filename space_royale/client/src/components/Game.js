@@ -1,271 +1,397 @@
-import React from 'react';
-import ReactDOM from 'react-dom'
-import '../App.css';
-import spaceship from './rocket.png'
-import background from './map.png';
-import { Vector2 } from 'three';
-import { resolve } from 'url';
-import io from 'socket.io-client';
-
-
-let socket = io.connect("http://localhost:5000");
+import React from "react";
+import ReactDOM from "react-dom";
+import "../App.css";
+import spaceship from "./rocket.png";
+import background from "./map.png";
+import bullet from "./bullet.png"
+import { Vector2 } from "three";
+import { resolve } from "url";
+import io from "socket.io-client";
 
 class Game extends React.Component {
-    constructor(props){
-        super(props);
-        this.game_data = {
-            canvas: {
-                width: 1000,
-                height: 1000
-            },
-            background: {
-                size: {
-                    x: 2300,
-                    y: 1000,
-                },
-                sprites: 0
-            },
-            ships:{
-                fast: {
-                    size: 50,
-                    sprites: 0
-                }
-            }
-        }
-        this.players = {
-            0: {
-                angle: 0,
-                pos: new Vector2(50, 100),
-                velocity: new Vector2(0, 0),
-                acceleration: 3
-            },
-            1: {
-                angle: 0,
-                pos: new Vector2(1250, 100),
-                velocity: new Vector2(50, 100),
-                acceleration: 3
-            },
-            2: {
-                angle: 0,
-                pos: new Vector2(50, 900),
-                velocity: new Vector2(50, 100),
-                acceleration: 3
-            },
-            3: {
-                angle: 0,
-                pos: new Vector2(50, 100),
-                velocity: new Vector2(50, 100),
-                acceleration: 3
-            }
-        }
-        this.mouse = new Vector2(50, 100);
-        this.change = false;
-    }
-
-    state = {
-        // acceleration: 0.025,
-
-
-
-
-        player: {
-            angle: 0,
-            pos: new Vector2(50, 100),
-            velocity: new Vector2(0,0)
+  constructor(props) {
+    super(props);
+    this.init = false;
+    this.ready = 0;
+    this.game_data = {
+      bullet: {
+        sprites: 0,
+        width: 5,
+        height: 10
+      },
+      canvas: {
+        width: 500,
+        height: 500
+      },
+      background: {
+        size: {
+          x: 2000,
+          y: 1000
         },
-        image: 0,
-        map: 0,
-        mouse: new Vector2(50,100),
-        change: false,
-        renderResponse: ""
-    }
-
-    getResponse = async() => {
-        const response = await fetch('/api/hello');
-        console.log(response);
-        const body = await response.json();
-        if (response.status !== 200) throw Error (body.message);
-        return body;
-    }
-
-    // fetch('/api/hello')
-    //         .then(res => res.json())
-    //         .then(data => this.setState({ renderResponse: data }))
-    // .catch(err => console.log(err));
-
-    movePlayer = () => {
-
-        // let this.players[0] = Object.assign(Object.create(Object.getPrototypeOf(this.players[0])), this.players[0])
-        let difference = this.mouse.clone();
-        if (this.change){
-            difference.sub(this.players[0].pos);
-            this.players[0].velocity = difference.clone();
-            this.players[0].velocity.normalize();
-            this.players[0].pos.add(this.players[0].velocity.multiplyScalar(3));
-            let newAngle = Math.atan2(difference.y, difference.x);
-            this.players[0].angle = newAngle;
-            if (this.players[0].pos.x < 0) {
-                this.players[0].pos.x = 0
-            }
-            if (this.players[0].pos.y < 0) {
-                this.players[0].pos.y = 0
-            }
-
-            if (this.players[0].pos.x > this.game_data.background.size.x) {
-                this.players[0].pos.x = this.game_data.background.size.x;
-            }
-            if (this.players[0].pos.y > this.game_data.background.size.y) {
-                this.players[0].pos.y = this.game_data.background.size.y;
-            }
-            this.change = false;
+        sprites: 0
+      },
+      ships: {
+        fast: {
+          size: 50,
+          sprites: 0
         }
-         else{
-            this.players[0].pos.add(this.players[0].velocity);
-            if (this.players[0].pos.x < 0) {
-                this.players[0].pos.x = 0
-            }
-            if (this.players[0].pos.y < 0) {
-                this.players[0].pos.y = 0
-            }
+      }
+    };
+    this.players = [];
+    this.placeholder = [];
 
-            if (this.players[0].pos.x > this.game_data.background.size.x) {
-                this.players[0].pos.x = this.game_data.background.size.x;
-            }
-            if (this.players[0].pos.y > this.game_data.background.size.y) {
-                this.players[0].pos.y = this.game_data.background.size.y;
-            }
+    this.mouse = new Vector2(50, 100);
+    this.change = false;
+    this.playerNumber = 0;
+    this.socket = io.connect("http://localhost:5000");
+    this.gameId = 0;
+  }
+
+  state = {
+    // acceleration: 0.025,
+    player: {
+      angle: 0,
+      pos: new Vector2(50, 100),
+      velocity: new Vector2(0, 0)
+    },
+    image: 0,
+    map: 0,
+    mouse: new Vector2(50, 100),
+    change: false,
+    renderResponse: ""
+  };
+
+  getResponse = async () => {
+    const response = await fetch("/api/hello");
+    // console.log(response);
+    const body = await response.json();
+    if (response.status !== 200) throw Error(body.message);
+    return body;
+  };
+
+
+  onMouseMove = e => {
+    let halfx = this.game_data.canvas.width / 2;
+    let halfy = this.game_data.canvas.height / 2;
+    let leftCornerx = Math.min(
+      Math.max(0, this.players[this.playerNumber].pos.x - halfx),
+      this.game_data.background.size.x - this.game_data.canvas.width
+    );
+    let leftCornery = Math.min(
+      Math.max(0, this.players[this.playerNumber].pos.y - halfy),
+      this.game_data.background.size.y - this.game_data.canvas.height
+    );
+    let m = new Vector2(
+      e.nativeEvent.offsetX + leftCornerx,
+      e.nativeEvent.offsetY + leftCornery
+    );
+
+    this.mouse = m;
+    // console.log(m);
+    this.change = true;
+    this.socket.emit("state", {
+      gameId: this.gameId,
+      playerId: this.playerNumber,
+      mouseInfo: m,
+    //   angle: newAngle 
+    });
+  };
+
+  drawPlayers = () => {
+    let halfx = this.game_data.canvas.width / 2;
+    let halfy = this.game_data.canvas.height / 2;
+    const ctx = this.refs.canvas.getContext("2d");
+    ctx.fillStyle = "green";
+    ctx.fillRect(
+      0,
+      0,
+      this.game_data.canvas.width,
+      this.game_data.canvas.height
+    );
+    let dx;
+    let dy;
+    if (this.players[this.playerNumber].pos.x < halfx) {
+      dx = 0;
+    } else if (
+      this.players[this.playerNumber].pos.x >
+      this.game_data.background.size.x - halfx
+    ) {
+      dx = this.game_data.background.size.x - this.game_data.canvas.width;
+    } else {
+      dx = this.players[this.playerNumber].pos.x - halfx;
+    }
+
+    if (this.players[this.playerNumber].pos.y < halfy) {
+      dy = 0;
+    } else if (
+      this.players[this.playerNumber].pos.y >
+      this.game_data.background.size.y - halfy
+    ) {
+      dy = this.game_data.background.size.y - this.game_data.canvas.height;
+    } else {
+      dy = this.players[this.playerNumber].pos.y - halfy;
+    }
+
+    ctx.drawImage(
+      this.game_data.background.sprites,
+      dx,
+      dy,
+      this.game_data.canvas.width,
+      this.game_data.canvas.height,
+      0,
+      0,
+      this.game_data.canvas.width,
+      this.game_data.canvas.height
+    );
+
+    let leftCornerx = 0;
+    let leftCornery = 0;
+    if (this.game_data.ships.fast.sprites !== 0) {
+      if (this.players[this.playerNumber].pos.x > this.game_data.background.size.x - halfx) {
+        leftCornerx = this.players[this.playerNumber].pos.x - (this.game_data.background.size.x - this.game_data.canvas.width);
+      } else if (this.players[this.playerNumber].pos.x < halfx) {
+        leftCornerx = this.players[this.playerNumber].pos.x;
+      } else {
+        leftCornerx = halfx;
+      }
+
+      if (
+        this.players[this.playerNumber].pos.y >
+        this.game_data.background.size.y - halfy
+      ) {
+        leftCornery =
+          this.players[this.playerNumber].pos.y -
+          (this.game_data.background.size.y - this.game_data.canvas.height);
+      } else if (this.players[this.playerNumber].pos.y < halfy) {
+        leftCornery = this.players[this.playerNumber].pos.y;
+      } else {
+        leftCornery = halfy;
+      }
+      // console.log(leftCornerx);
+
+      ctx.save();
+      ctx.translate(leftCornerx, leftCornery);
+
+      ctx.rotate(this.players[this.playerNumber].angle + 90 * (Math.PI / 180));
+      ctx.translate(-25, -25);
+
+      ctx.drawImage(this.game_data.ships.fast.sprites, 0, 0, 50, 50);
+      ctx.restore();
+    }
+
+    let canvas = this.getCavasPosition();
+
+    for (let i = 0; i < this.players.length; i++) {
+      if (i !== this.playerNumber) {
+        if (this.inCanvas(this.players[i].pos)) {
+          ctx.save();
+          // ctx.translate(tcanvas.x, canvas.y);
+          ctx.translate(this.players[i].pos.x - canvas.x, this.players[i].pos.y - canvas.y);
+          // console.log(this.players[i].pos);
+
+          ctx.rotate(this.players[i].angle + 90 * (Math.PI / 180));
+          ctx.translate(-25, -25);
+
+          ctx.drawImage(
+            this.game_data.ships.fast.sprites,
+            0,
+            0,
+            50,
+            50
+          );
+          ctx.restore();
         }
-    }
-
-    onMouseMove = (e) => {
-        let halfx = this.game_data.canvas.width / 2;
-        let halfy = this.game_data.canvas.height / 2;
-        let leftCornerx = Math.min(Math.max(0, this.players[0].pos.x - halfx), this.game_data.background.size.x - this.game_data.canvas.width);
-        let leftCornery = Math.min(Math.max(0, this.players[0].pos.y - halfy), this.game_data.background.size.y - this.game_data.canvas.height);
-        let m = new Vector2(e.nativeEvent.offsetX+leftCornerx, e.nativeEvent.offsetY+leftCornery);
-        console.log(m)
-        this.mouse = m;
-        this.change = true;
-        socket.emit('state', this.players[0]);
-    }
-
-    draw = () => {
-        let halfx = this.game_data.canvas.width / 2;
-        let halfy = this.game_data.canvas.height / 2;
-        const ctx = this.refs.canvas.getContext("2d");
-        ctx.fillStyle = "green";
-        ctx.fillRect(0, 0, this.game_data.canvas.width, this.game_data.canvas.height);
-        let dx;
-        let dy;
-        if (this.players[0].pos.x < halfx) {
-            dx = 0
-        } else if (this.players[0].pos.x > this.game_data.background.size.x - halfx) {
-            dx = this.game_data.background.size.x - this.game_data.canvas.width;
-        } else {
-            dx = this.players[0].pos.x - halfx;
-        }
-
-        if (this.players[0].pos.y < halfy) {
-            dy = 0
-        } else if (this.players[0].pos.y > this.game_data.background.size.y - halfy) {
-            dy = this.game_data.background.size.y - this.game_data.canvas.height;
-        } else {
-            dy = this.players[0].pos.y - halfy;
-        }
-
-        ctx.drawImage(this.game_data.background.sprites, dx, dy, this.game_data.canvas.width, this.game_data.canvas.height, 0, 0, this.game_data.canvas.width, this.game_data.canvas.height);
-        if (this.game_data.ships.fast.sprites !== 0){
-            
-            let leftCornerx = 0;
-            let leftCornery = 0;
-
-            
-            if (this.players[0].pos.x > this.game_data.background.size.x - halfx) {
-                leftCornerx = this.players[0].pos.x - (this.game_data.background.size.x - this.game_data.canvas.width);
-            }  else if (this.players[0].pos.x < halfx) {
-                leftCornerx = this.players[0].pos.x;
-            } else {
-                leftCornerx = halfx;
-            }
-
-            if (this.players[0].pos.y > this.game_data.background.size.y - halfy) {
-                leftCornery = this.players[0].pos.y - (this.game_data.background.size.y - this.game_data.canvas.height);
-            } else if (this.players[0].pos.y < halfy) {
-                leftCornery = this.players[0].pos.y;
-            } else {
-                leftCornery = halfy;
-            }
-            
-            ctx.save();
-            ctx.translate(leftCornerx, leftCornery);
-
-            ctx.rotate((this.players[0].angle) + 90 * (Math.PI / 180) );
-            ctx.translate(-25, -25);
-
-            ctx.drawImage(this.game_data.ships.fast.sprites, 0, 0, 50,50 )
-            ctx.restore();  
-  
-        }
-    }
-
-    update = () => {
-        this.movePlayer();
-
-
-        // console.log(this.players[0].pos);
-        this.draw();
-    }
-
-    loadCharacter = (img) => {
-        this.game_data.ships.fast.sprites = img;
-        // this.setState({image: img})
-    }
-
-    loadMap = (img) => {
-        this.game_data.background.sprites = img;
-    }
-
-    onMouseEnter = (e) => {
-        this.change = true;
-    }
-
-    onMouseLeave = (e) => {
-        this.setState({ change: false });
-    }
-    componentDidMount() {
-        // this.getResponse().then(res => {
-        //     const someData = res;
-        //     this.setState({ renderResponse: someData });
-        // });
-        setInterval(() => {
-            this.update();
-        }, 1000/60);
-        let img = new Image();
-        img.onload = this.loadCharacter(img);
-        img.src = spaceship;
+          // console.log("HERE");
         
-        let bg = new Image();
-        bg.onload = this.loadMap(bg); 
-        bg.src = background;
-        fetch('api/hello')
-            .then(res => res.json())
-            .then(data => this.setState({ renderResponse: data }))
-            .catch(err => console.log(err));
+      }
+    }
+  };
 
-
+  getCavasPosition = () => {
+    let halfx = this.game_data.canvas.width / 2;
+    let halfy = this.game_data.canvas.height / 2;
+    let canvasx;
+    let canvasy;
+    if (this.players[this.playerNumber].pos.x < halfx) {
+      canvasx = 0;
+    } else if (
+      this.players[this.playerNumber].pos.x >
+      this.game_data.background.size.x - halfx
+    ) {
+      canvasx =
+        this.game_data.background.size.x -
+        this.game_data.canvas.width;
+    } else {
+      canvasx = this.players[this.playerNumber].pos.x - halfx;
     }
 
-
-
-
-    render(){
-        return (
-            <div className="game">
-                <canvas ref="canvas" width={this.game_data.canvas.width} height={this.game_data.canvas.height} onMouseMove={this.onMouseMove} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}/>
-                <p>{this.state.renderResponse.express}</p>
-            </div>
-        )
+    if (this.players[this.playerNumber].pos.y < halfy) {
+      canvasy = 0;
+    } else if (
+      this.players[this.playerNumber].pos.y >
+      this.game_data.background.size.y - halfy
+    ) {
+      canvasy =
+        this.game_data.background.size.y -
+        this.game_data.canvas.height;
+    } else {
+      canvasy = this.players[this.playerNumber].pos.y - halfy;
     }
+
+    return {x: canvasx, y: canvasy}
+  }
+
+  inCanvas = (pos) => {
+    let canvas = this.getCavasPosition();
+    if (  pos.x >= canvas.x &&
+          pos.x <= canvas.x + this.game_data.canvas.width &&
+          pos.y >= canvas.y &&
+          pos.y <= canvas.y + this.game_data.canvas.height){
+            return true
+          } else {
+            return false;
+          }
+  }
+
+  drawBullets = () => {
+    const ctx = this.refs.canvas.getContext("2d");
+    for (let i = 0; i < this.players.length; i++) {
+      for (let b = 0; b < this.players[i].bullets.length; b++){
+        if (this.inCanvas(this.players[i].bullets[b].pos)){
+          let canvas = this.getCavasPosition();
+          ctx.save();
+          console.log(this.players[i].bullets);
+          ctx.translate(
+            this.players[i].bullets[b].pos.x - canvas.x,
+            this.players[i].bullets[b].pos.y - canvas.y
+          );
+  
+          ctx.rotate(
+            this.players[i].bullets[b].angle +
+              90 * (Math.PI / 180)
+          );
+  
+          ctx.drawImage(this.game_data.bullet.sprites, 0, 0, 10, 20);
+  
+          ctx.restore();
+
+        }
+
+      }
+    }
+
+  }
+
+  update = () => {
+    // console.log(this.players); 
+    if (this.ready == 2){
+        this.drawPlayers();
+        this.drawBullets();
+    }
+  };
+
+  fire = e => {
+    if (e.code === "Space"){
+      this.socket.emit("fire", {player: this.playerNumber});
+    }
+  }
+
+  loadCharacter = img => {
+    this.game_data.ships.fast.sprites = img;
+    // this.setState({image: img})
+  };
+
+  loadMap = img => {
+    this.game_data.background.sprites = img;
+  };
+
+  loadBullet = img => {
+    this.game_data.bullet.sprites = img;
+  }
+
+  onMouseEnter = e => {
+    this.change = true;
+  };
+
+  onMouseLeave = e => {
+    this.setState({ change: false });
+  };
+
+  updateGame = data => {
+    this.ready = data.readyPlayers;
+    this.players = data.playersInfo;
+  }
+
+  initGame = data => {
+    // console.log(data.gameId);
+    this.players = data.playersInfo;
+    // console.log(this.players.length);
+    this.gameId = data.gameId;
+    this.playerNumber = data.player;
+    this.init = true;
+
+    this.socket.emit("ready", {
+      gameId: this.gameId,
+      player: this.playerNumber
+    });
+
+    this.socket.on("update", this.updateGame);
+    document.addEventListener("keydown", this.fire, false);
+
+    // console.log(this.init);
+    setInterval(() => {
+      this.update();
+    }, 1000 / 100);
+  };
+
+  
+
+  componentDidMount() {
+    let img = new Image();
+    img.onload = this.loadCharacter(img);
+    img.src = spaceship;
+
+    let bg = new Image();
+    bg.onload = this.loadMap(bg);
+    bg.src = background;
+
+    let b = new Image();
+    b.onload = this.loadBullet(b);
+    b.src = bullet;
+
+    fetch("api/hello")
+      .then(res => res.json())
+      .then(data => this.setState({ renderResponse: data }))
+      .catch(err => console.log(err));
+    
+
+    this.socket.on("init", this.initGame);
+  }
+
+  componentWillUnmount(){
+        document.removeEventListener(
+          "keydown",
+          this.fire,
+          false
+        );
+  }
+
+  render() {
+    return (
+      <div className="game">
+        <canvas
+          ref="canvas"
+          width={this.game_data.canvas.width}
+          height={this.game_data.canvas.height}
+          onMouseMove={this.onMouseMove}
+          onMouseEnter={this.onMouseEnter}
+          onMouseLeave={this.onMouseLeave}
+          onKeyDown = {this.fire}
+        />
+        <p>{this.state.renderResponse.express}</p>
+      </div>
+    );
+  }
 }
 
 export default Game;
