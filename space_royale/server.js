@@ -29,7 +29,7 @@ app.post('/api/world', (req, res) => {
 });
 
 function convertImage(imagePath) {
-    return fs.readFileAsync(imagePath, 'base64')
+    return fs.readFileAsync(__dirname + imagePath, 'base64')
 }
 
 function convertAllImages() {
@@ -77,6 +77,7 @@ db.each(ship_table, (err, row) => {
         throw err;
     };
 
+    console.log(row.File);
     ships[row.ID] = row.File;
 });
 
