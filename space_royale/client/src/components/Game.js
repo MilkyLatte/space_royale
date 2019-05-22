@@ -40,14 +40,11 @@ class Game extends React.Component {
         },
         sprites: 0
       },
-      ships: {
-        fast: {
-          size: 50,
-          sprites: 0
-        }
-      },
-      rockets: []
-      
+      rockets: [],
+      UI: {
+        health: [],
+        bullets: 0    
+      }
     };
     this.players = [];
     this.placeholder = [];
@@ -274,14 +271,18 @@ class Game extends React.Component {
           ctx.drawImage(this.game_data.bullet.sprites, 0, 0, 20, 40);
   
           ctx.restore();
-
         }
-
       }
     }
-
   }
 
+  drawUI = () => {
+    const ctx = this.refs.canvas.getContext("2d");
+    let health = Math.floor(Math.random() * 11)
+    ctx.drawImage(this.game_data.UI.health[health], 50, 400);
+    // ctx.drawImage(this.game_data.UI.bullets, 300, 400);
+
+  }
   update = () => {
     // this.game_data.canvas.width = window.innerWidth;
     // this.game_data.canvas.height = window.innerHeight;
@@ -290,6 +291,7 @@ class Game extends React.Component {
     if (this.playing && !this.gameOver){
         this.drawPlayers();
         this.drawBullets();
+        this.drawUI();
     }
   };
 
@@ -347,44 +349,61 @@ class Game extends React.Component {
     }, 1000 / 100);
   }
 
-  
-
-  componentDidMount() {
-
-    // img.src = spaceship;
-
-    let bg = new Image();
-    bg.onload = this.loadMap(bg);
-    bg.src = background;
-
-    for (let i = 0; i < 5; i++){
-      if (i == 4){
+  loadShips = () => {
+    for (let i = 0; i < 5; i++) {
+      if (i == 4) {
         let b = new Image();
         b.onload = this.loadBullet(b);
         fetch("api/ships")
           .then(res => res.json())
           .then(data => {
-            b.src = `data:image/svg+xml;base64, ${
-              data.express[i]
-            }`;
+            b.src = `data:image/svg+xml;base64, ${data.express[i]}`;
           });
-          continue;
+        continue;
       }
       let img = new Image();
       img.onload = this.loadCharacter(img);
       fetch("api/ships")
         .then(res => res.json())
         .then(data => {
-          img.src = `data:image/svg+xml;base64, ${data.express[i]}`});
+          img.src = `data:image/svg+xml;base64, ${data.express[i]}`;
+        });
     }
+  }
 
-    fetch("api/hp")
-      .then(res => res.json())
-      .then(data => console.log(data.express.length));
-    
+  loadUI = (img, bullet) => {
+    if (!bullet){
+      this.game_data.UI.health.push(img);
+    } else {
+      this.game_data.UI.bullets = img;
+    }
+  }
+  loadUIElements = () => {
+    for (let i = 0; i < 11; i++){
+      let img = new Image();
+      img.onload = this.loadUI(img, false);
+      fetch("api/hp")
+        .then(res => res.json())
+        .then(data => {
+          img.src = `data:image/svg+xml;base64, ${data.express[i]}`;
+        });
+    }
+    let img = new Image();
+    img.onload = this.loadUI(img, true);
     fetch("api/bulletCounter")
       .then(res => res.json())
-      .then(data => console.log("Received"));
+      .then(data => {
+        img.src = `data:image/svg+xml;base64, ${data.express}`;
+      });
+  }
+
+  componentDidMount() {
+    let bg = new Image();
+    bg.onload = this.loadMap(bg);
+    bg.src = background;
+
+    this.loadShips();
+    this.loadUIElements();
 
     fetch("api/hello")
       .then(res => res.json())
