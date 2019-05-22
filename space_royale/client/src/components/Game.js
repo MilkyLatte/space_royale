@@ -8,6 +8,17 @@ import { Vector2 } from "three";
 import { resolve } from "url";
 import io from "socket.io-client";
 
+class Ship {
+  constructor(width, height, img){
+    this.width = width;
+    this.height = height;
+    this.image = img; 
+  }
+}
+
+
+
+
 class Game extends React.Component {
   constructor(props) {
     super(props);
@@ -34,7 +45,9 @@ class Game extends React.Component {
           size: 50,
           sprites: 0
         }
-      }
+      },
+      rockets: []
+      
     };
     this.players = [];
     this.placeholder = [];
@@ -137,7 +150,7 @@ class Game extends React.Component {
 
     let leftCornerx = 0;
     let leftCornery = 0;
-    if (this.game_data.ships.fast.sprites !== 0) {
+    if (this.game_data.rockets[0].image !== 0) {
       if (this.players[this.playerNumber].pos.x > this.game_data.background.size.x - halfx) {
         leftCornerx = this.players[this.playerNumber].pos.x - (this.game_data.background.size.x - this.game_data.canvas.width);
       } else if (this.players[this.playerNumber].pos.x < halfx) {
@@ -164,9 +177,9 @@ class Game extends React.Component {
       ctx.translate(leftCornerx, leftCornery);
 
       ctx.rotate(this.players[this.playerNumber].angle + 90 * (Math.PI / 180));
-      ctx.translate(-25, -25);
+      ctx.translate(-50, -50);
 
-      ctx.drawImage(this.game_data.ships.fast.sprites, 0, 0, 50, 50);
+      ctx.drawImage(this.game_data.rockets[this.players[this.playerNumber].type].image, 0, 0, 100, 100);
       ctx.restore();
     }
 
@@ -185,11 +198,7 @@ class Game extends React.Component {
           ctx.translate(-25, -25);
 
           ctx.drawImage(
-            this.game_data.ships.fast.sprites,
-            0,
-            0,
-            50,
-            50
+            this.game_data.rockets[this.players[i].type].image,0,0,100,100
           );
           ctx.restore();
         }
@@ -262,7 +271,7 @@ class Game extends React.Component {
               90 * (Math.PI / 180)
           );
   
-          ctx.drawImage(this.game_data.bullet.sprites, 0, 0, 10, 20);
+          ctx.drawImage(this.game_data.bullet.sprites, 0, 0, 20, 40);
   
           ctx.restore();
 
@@ -274,6 +283,8 @@ class Game extends React.Component {
   }
 
   update = () => {
+    // this.game_data.canvas.width = window.innerWidth;
+    // this.game_data.canvas.height = window.innerHeight;
     // console.log(this.players); 
     if (this.gameOver) console.log("GAMEOVER");
     if (this.playing && !this.gameOver){
@@ -289,7 +300,8 @@ class Game extends React.Component {
   }
 
   loadCharacter = img => {
-    this.game_data.ships.fast.sprites = img;
+    this.game_data.rockets.push(new Ship(50, 50, img))
+    // this.game_data.ships.fast.sprites = img;
     // this.setState({image: img})
   };
 
@@ -338,22 +350,33 @@ class Game extends React.Component {
   
 
   componentDidMount() {
-    let img = new Image();
-    img.onload = this.loadCharacter(img);
-    img.src = spaceship;
+
+    // img.src = spaceship;
 
     let bg = new Image();
     bg.onload = this.loadMap(bg);
     bg.src = background;
 
-    fetch("api/ships")
-      .then(res => res.json())
-      .then(data => {
-        img.src = `data:image/svg+xml;base64, ${data.express[0]}`});
-
-    let b = new Image();
-    b.onload = this.loadBullet(b);
-    b.src = bullet;
+    for (let i = 0; i < 5; i++){
+      if (i == 4){
+        let b = new Image();
+        b.onload = this.loadBullet(b);
+        fetch("api/ships")
+          .then(res => res.json())
+          .then(data => {
+            b.src = `data:image/svg+xml;base64, ${
+              data.express[i]
+            }`;
+          });
+          continue;
+      }
+      let img = new Image();
+      img.onload = this.loadCharacter(img);
+      fetch("api/ships")
+        .then(res => res.json())
+        .then(data => {
+          img.src = `data:image/svg+xml;base64, ${data.express[i]}`});
+    }
 
     fetch("api/hello")
       .then(res => res.json())
