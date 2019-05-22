@@ -192,7 +192,7 @@ class Game extends React.Component {
           // console.log(this.players[i].pos);
 
           ctx.rotate(this.players[i].angle + 90 * (Math.PI / 180));
-          ctx.translate(-25, -25);
+          ctx.translate(-50, -50);
 
           ctx.drawImage(
             this.game_data.rockets[this.players[i].type].image,0,0,100,100
