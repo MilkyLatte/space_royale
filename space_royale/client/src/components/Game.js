@@ -278,9 +278,10 @@ class Game extends React.Component {
 
   drawUI = () => {
     const ctx = this.refs.canvas.getContext("2d");
-    let health = Math.floor(Math.random() * 11)
+    let health = Math.floor(this.players[this.playerNumber].health/10);
+    console.log(health); 
     ctx.drawImage(this.game_data.UI.health[health], 50, 400);
-    // ctx.drawImage(this.game_data.UI.bullets, 300, 400);
+    ctx.drawImage(this.game_data.UI.bullets, 650, 400, 100, 50);
 
   }
   update = () => {
@@ -379,7 +380,7 @@ class Game extends React.Component {
     }
   }
   loadUIElements = () => {
-    for (let i = 0; i < 11; i++){
+    for (let i = 10; i >= 0; i--){
       let img = new Image();
       img.onload = this.loadUI(img, false);
       fetch("api/hp")
