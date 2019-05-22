@@ -146,7 +146,7 @@ db.close((err) => {
 // Game Logic
 
 class Player {
-    constructor(type, id, number, acceleration, health, height, width, damage) {
+    constructor(type, id, number, acceleration, health, height, width, damage, bulletCooldown) {
         this.type = type;
         this.id = id;
         this.ready = false;
@@ -163,7 +163,23 @@ class Player {
         this.height = height;
         this.width = width;
         this.damage = damage;
+        this.bulletCooldown = bulletCooldown; //Cooldown in milliseconds
     } 
+
+    getPackedData(){
+        let packet = {
+            type: this.type,
+            angle: this.angle,
+            pos: {
+                x: this.pos.x,
+                y: this.pos.y
+            },
+            bullets: this.bullets,
+            health: this.health,
+            dead: this.dead
+        }
+        return packet;
+    }
 
     getBoundingBox(){
         let size = 15;
@@ -185,9 +201,7 @@ class Player {
             y: this.pos.y + size
           }
         }; 
-
         return corners;
-
     }
 }
 
@@ -219,17 +233,17 @@ class Game {
         let newPlayer;
         switch (type) {
             case 0:
-                newPlayer = new Player(0, id, currentPlayer, 4, 60, 50, 50, 10);
+                newPlayer = new Player(0, id, currentPlayer, 4, 60, 50, 50, 10, 200);
                 
                 break;
             case 1:
-                newPlayer = new Player(1, id, currentPlayer, 3, 90, 60, 60, 15);
+                newPlayer = new Player(1, id, currentPlayer, 3, 90, 60, 60, 15, 200);
                 break;
             case 2:
-                newPlayer = new Player(2, id, currentPlayer, 2, 100, 100, 100, 30);
+                newPlayer = new Player(2, id, currentPlayer, 2, 100, 100, 100, 30, 200);
                 break;
             case 3:
-                newPlayer = new Player(3, id, currentPlayer, 2, 100, 90, 90, 20);
+                newPlayer = new Player(3, id, currentPlayer, 2, 100, 90, 90, 20, 200);
                 break;
             default:
                 break;
@@ -382,6 +396,7 @@ io.on('connection', function(socket){
     let connected = false;
     let playing = false;
     let playerID;
+    let lastBullet = 0; 
 
     socket.on("choice", function(data){
         let added = false;
@@ -423,22 +438,26 @@ io.on('connection', function(socket){
     })
 
     socket.on('fire', function(data){
-        let p1 = master.games[GAMEID].players[playerID].pos.clone();
-        let p2 = master.games[GAMEID].players[playerID].pos.clone();
-
-        let v = master.games[GAMEID].players[playerID].velocity.clone();
-        let angle = master.games[GAMEID].players[playerID].angle;
-
-        p1.x += 25 * Math.cos(angle) + 25 * Math.sin(angle);
-        p1.y +=  - 25 * Math.cos(angle) +  25 * Math.sin(angle);
-        let bullet = new Bullet(
-          p1,
-          v,
-          angle,
-          playerID
-        );
-
-        master.games[GAMEID].players[playerID].bullets.push(bullet);
+        let now = (new Date).getTime();
+        if (now - lastBullet > master.games[GAMEID].players[playerID].bulletCooldown) {
+            console.log("HERE");
+            let p1 = master.games[GAMEID].players[playerID].pos.clone();
+            let p2 = master.games[GAMEID].players[playerID].pos.clone();
+    
+            let v = master.games[GAMEID].players[playerID].velocity.clone();
+            let angle = master.games[GAMEID].players[playerID].angle;
+    
+            p1.x += 25 * Math.cos(angle) + 25 * Math.sin(angle);
+            p1.y +=  - 25 * Math.cos(angle) +  25 * Math.sin(angle);
+            let bullet = new Bullet(
+              p1,
+              v,
+              angle,
+              playerID
+            );
+            master.games[GAMEID].players[playerID].bullets.push(bullet);
+            lastBullet = now;
+        }
     })
 
     let interval = setInterval(gameStart, 1000/100);
@@ -453,15 +472,19 @@ io.on('connection', function(socket){
             }
         }
     }
-
+    
     let mainLoop = setInterval(updater, 1000/100)
     function updater(){
         if (playing) {
             if (master.games[GAMEID].players[playerID].dead){
                 socket.emit("gameover", {gameOver: true});
             }
+            let players = []
+            master.games[GAMEID].players.forEach(player => {
+                players.push(player.getPackedData());
+            });
             socket.emit("update", {
-              playersInfo: master.games[GAMEID].players,
+              playersInfo: players,
             });
         }
         if (socket.disconnected) {
