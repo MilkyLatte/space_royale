@@ -84,7 +84,7 @@ app.get('/api/hp', (req, res) => {
 app.get('/api/bulletCounter', (req, res) => {
     var sendInfo = {};
 
-    fs.readFile(bulletCounter[0], 'base64', (err, base64Image) => {
+    fs.readFile(__dirname + bulletCounter[0], 'base64', (err, base64Image) => {
         res.send({express: base64Image});
         console.log("Sent bullet counter to client".blue)
     });
@@ -127,7 +127,10 @@ db.each(hp_Bar_Table, (err, row) =>  {
     }
 
     if (row.id != 12) hpBars[row.id] = row.filePath;
-    else bulletCounter[0] = row.filePath;
+    else {
+        bulletCounter[0] = row.filePath;
+        console.log(bulletCounter[0]);
+    }
 });
 /////////////////////////////////////////////////
 
