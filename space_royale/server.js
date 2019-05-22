@@ -5,6 +5,7 @@ const THREE = require("three");
 const sqlite3 = require("sqlite3").verbose();
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
+const color = require('colors');
 
 var ships = {};
 var hpBars = {};
@@ -32,7 +33,8 @@ function convertImage(imagePath) {
     return fs.readFileAsync(__dirname + imagePath, 'base64')
 }
 
-function convertAllImages() {
+// convert ships to base 64
+function convertAllShipsImages() {
     var promises = [];
     const size = Object.keys(ships).length;
 
@@ -41,21 +43,55 @@ function convertAllImages() {
     }
     return Promise.all(promises);
 }
-// Client requesting ship information //////////////
 
+// convert hp bars to base 64
+
+function convertAllhpImages() {
+    var promises = [];
+    const size = Object.keys(hpBars).length;
+
+    for (var i = 1; i <= size; i++) {
+        promises[i - 1] = convertImage(hpBars[i]);
+    }
+
+    return Promise.all(promises);
+
+}
+
+// Client requesting ship information //////////////
 app.get('/api/ships', (req, res) => {
 
-    convertAllImages().then(function(imageJSON) {
-        console.log(Object.keys(imageJSON));
+    convertAllShipsImages().then(function(imageJSON) {
         res.send({express: imageJSON});
-        console.log("Sent")
+        console.log("Sent ships to client".blue)
     }, function(err) {
         throw(err);
     });
 });
 
-////////////////////////////////////////////////////
+// Client requesting hp bars //////////////////////
 
+app.get('/api/hp', (req, res) => {
+    convertAllhpImages().then(function(imageJSON) {
+        res.send({express:imageJSON});
+        console.log("Sent hp bars to client".blue);
+    }, function(err) {
+        throw(err);
+    });
+    
+}); 
+
+app.get('/api/bulletCounter', (req, res) => {
+    var sendInfo = {};
+
+    fs.readFile(bulletCounter[0], 'base64', (err, base64Image) => {
+        res.send({express: base64Image});
+        console.log("Sent bullet counter to client".blue)
+    });
+})
+
+
+////////////////////////////////////////////////////
 
 // Database Connection//////////////////////////////
 let db = new sqlite3.Database('./Database/game_database', sqlite3.OPEN_READONLY, (err) => {
@@ -63,7 +99,7 @@ let db = new sqlite3.Database('./Database/game_database', sqlite3.OPEN_READONLY,
         console.error(err.message);
     }
 
-    console.log('Connected to the game database');
+    console.log('Connected to the game database'.blue);
 });
 const server = app.listen(port, () => console.log(`Listening on port ${ port}`));
 //////t////////////////////////////////////////////////
@@ -77,7 +113,6 @@ db.each(ship_table, (err, row) => {
         throw err;
     };
 
-    console.log(row.File);
     ships[row.ID] = row.File;
 });
 
@@ -92,7 +127,7 @@ db.each(hp_Bar_Table, (err, row) =>  {
     }
 
     if (row.id != 12) hpBars[row.id] = row.filePath;
-    else bulletCounter[row.id] = row.filePath;
+    else bulletCounter[0] = row.filePath;
 });
 /////////////////////////////////////////////////
 
@@ -102,7 +137,7 @@ db.close((err) => {
         console.error(err.message);
     }
 
-    console.log('Closed the database connection');
+    console.log('Closed the database connection'.blue);
 })
 
 // Game Logic

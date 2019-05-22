@@ -378,6 +378,14 @@ class Game extends React.Component {
           img.src = `data:image/svg+xml;base64, ${data.express[i]}`});
     }
 
+    fetch("api/hp")
+      .then(res => res.json())
+      .then(data => console.log(data.express.length));
+    
+    fetch("api/bulletCounter")
+      .then(res => res.json())
+      .then(data => console.log("Received"));
+
     fetch("api/hello")
       .then(res => res.json())
       .then(data => this.setState({ renderResponse: data }))
