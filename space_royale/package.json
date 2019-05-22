@@ -9,10 +9,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.5.4",
     "body-parser": "^1.19.0",
     "express": "^4.16.4",
     "socket.io": "^2.2.0",
-    "three.js": "^0.77.1"
+    "sqlite3": "^4.0.8",
+    "three.js": "^0.77.1",
+    "yarn": "^1.16.0"
   },
   "devDependencies": {
     "concurrently": "^4.1.0"

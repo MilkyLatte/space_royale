@@ -2,6 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const socket = require("socket.io");
 const THREE = require("three");
+const sqlite3 = require("sqlite3").verbose();
+const Promise = require('bluebird');
+const fs = Promise.promisifyAll(require('fs'));
+
+var ships = {};
+var hpBars = {};
+var bulletCounter = {};
 
 
 
@@ -21,8 +28,81 @@ app.post('/api/world', (req, res) => {
     );
 });
 
-const server = app.listen(port, () => console.log(`Listening on port ${ port}`));
+function convertImage(imagePath) {
+    return fs.readFileAsync(imagePath, 'base64')
+}
 
+function convertAllImages() {
+    var promises = [];
+    const size = Object.keys(ships).length;
+
+    for (var i = 1; i <= size; i++) {
+        promises[i - 1] = convertImage(ships[i]);
+    }
+    return Promise.all(promises);
+}
+// Client requesting ship information //////////////
+
+app.get('/api/ships', (req, res) => {
+
+    convertAllImages().then(function(imageJSON) {
+        console.log(Object.keys(imageJSON));
+        res.send({express: imageJSON});
+        console.log("Sent")
+    }, function(err) {
+        throw(err);
+    });
+});
+
+////////////////////////////////////////////////////
+
+
+// Database Connection//////////////////////////////
+let db = new sqlite3.Database('./Database/game_database', sqlite3.OPEN_READONLY, (err) => {
+    if (err) {
+        console.error(err.message);
+    }
+
+    console.log('Connected to the game database');
+});
+const server = app.listen(port, () => console.log(`Listening on port ${ port}`));
+//////t////////////////////////////////////////////////
+
+
+// Access ships and table /////////////////
+let ship_table = 'SELECT ID, File FROM ShipsBullet ORDER BY ID';
+
+db.each(ship_table, (err, row) => {
+    if (err) {
+        throw err;
+    };
+
+    ships[row.ID] = row.File;
+});
+
+////////////////////////////////////////////
+
+let hp_Bar_Table = 'SELECT id, filePath FROM UI_HP_Bars_And_Bullets ORDER BY id';
+
+// Access hp bar and bullet counter database
+db.each(hp_Bar_Table, (err, row) =>  {
+    if (err) {
+        throw err;
+    }
+
+    if (row.id != 12) hpBars[row.id] = row.filePath;
+    else bulletCounter[row.id] = row.filePath;
+});
+/////////////////////////////////////////////////
+
+// Close database connection ///////////////////////
+db.close((err) => {
+    if (err) {
+        console.error(err.message);
+    }
+
+    console.log('Closed the database connection');
+})
 
 // Game Logic
 

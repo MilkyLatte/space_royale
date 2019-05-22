@@ -61,7 +61,7 @@ class Game extends React.Component {
 
 
   onMouseMove = e => {
-    if (this.playing) {
+    if (this.playing && !this.gameOver) {
       let halfx = this.game_data.canvas.width / 2;
       let halfy = this.game_data.canvas.height / 2;
       let leftCornerx = Math.min(
@@ -345,6 +345,11 @@ class Game extends React.Component {
     let bg = new Image();
     bg.onload = this.loadMap(bg);
     bg.src = background;
+
+    fetch("api/ships")
+      .then(res => res.json())
+      .then(data => {
+        img.src = `data:image/svg+xml;base64, ${data.express[0]}`});
 
     let b = new Image();
     b.onload = this.loadBullet(b);
