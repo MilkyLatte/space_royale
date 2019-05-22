@@ -22,7 +22,7 @@ class Ship {
 class Game extends React.Component {
   constructor(props) {
     super(props);
-    this.playing = true;
+    this.playing = false;
     this.game_data = {
       bullet: {
         sprites: 0,
@@ -279,7 +279,6 @@ class Game extends React.Component {
   drawUI = () => {
     const ctx = this.refs.canvas.getContext("2d");
     let health = Math.floor(this.players[this.playerNumber].health/10);
-    console.log(health); 
     ctx.drawImage(this.game_data.UI.health[health], 50, 400);
     ctx.drawImage(this.game_data.UI.bullets, 650, 400, 100, 50);
 
@@ -412,8 +411,8 @@ class Game extends React.Component {
       .catch(err => console.log(err));
     
     this.socket.emit("choice", {type: Math.floor(Math.random() * 4) });
-    this.socket.on("play", this.play);
     this.socket.on("init", this.initGame);
+    this.socket.on("play", this.play);
   }
 
   componentWillUnmount(){

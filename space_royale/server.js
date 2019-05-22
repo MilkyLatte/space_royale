@@ -226,7 +226,7 @@ class Game {
                 newPlayer = new Player(1, id, currentPlayer, 3, 90, 60, 60, 15);
                 break;
             case 2:
-                newPlayer = new Player(2, id, currentPlayer, 2, 120, 100, 100, 30);
+                newPlayer = new Player(2, id, currentPlayer, 2, 100, 100, 100, 30);
                 break;
             case 3:
                 newPlayer = new Player(3, id, currentPlayer, 2, 100, 90, 90, 20);
@@ -458,7 +458,6 @@ io.on('connection', function(socket){
     function updater(){
         if (playing) {
             if (master.games[GAMEID].players[playerID].dead){
-                console.log("HERE");
                 socket.emit("gameover", {gameOver: true});
             }
             socket.emit("update", {
