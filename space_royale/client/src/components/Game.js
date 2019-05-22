@@ -11,8 +11,7 @@ import io from "socket.io-client";
 class Game extends React.Component {
   constructor(props) {
     super(props);
-    this.init = false;
-    this.ready = 0;
+    this.playing = true;
     this.game_data = {
       bullet: {
         sprites: 0,
@@ -20,10 +19,10 @@ class Game extends React.Component {
         height: 10
       },
       canvas: {
-        width: 500,
+        width: 800,
         height: 500
       },
-      background: {
+      background: { 
         size: {
           x: 2000,
           y: 1000
@@ -45,19 +44,10 @@ class Game extends React.Component {
     this.playerNumber = 0;
     this.socket = io.connect("http://localhost:5000");
     this.gameId = 0;
+    this.gameOver = false;
   }
 
   state = {
-    // acceleration: 0.025,
-    player: {
-      angle: 0,
-      pos: new Vector2(50, 100),
-      velocity: new Vector2(0, 0)
-    },
-    image: 0,
-    map: 0,
-    mouse: new Vector2(50, 100),
-    change: false,
     renderResponse: ""
   };
 
@@ -71,30 +61,31 @@ class Game extends React.Component {
 
 
   onMouseMove = e => {
-    let halfx = this.game_data.canvas.width / 2;
-    let halfy = this.game_data.canvas.height / 2;
-    let leftCornerx = Math.min(
-      Math.max(0, this.players[this.playerNumber].pos.x - halfx),
-      this.game_data.background.size.x - this.game_data.canvas.width
-    );
-    let leftCornery = Math.min(
-      Math.max(0, this.players[this.playerNumber].pos.y - halfy),
-      this.game_data.background.size.y - this.game_data.canvas.height
-    );
-    let m = new Vector2(
-      e.nativeEvent.offsetX + leftCornerx,
-      e.nativeEvent.offsetY + leftCornery
-    );
+    if (this.playing) {
+      let halfx = this.game_data.canvas.width / 2;
+      let halfy = this.game_data.canvas.height / 2;
+      let leftCornerx = Math.min(
+        Math.max(0, this.players[this.playerNumber].pos.x - halfx),
+        this.game_data.background.size.x - this.game_data.canvas.width
+      );
+      let leftCornery = Math.min(
+        Math.max(0, this.players[this.playerNumber].pos.y - halfy),
+        this.game_data.background.size.y - this.game_data.canvas.height
+      );
+      let m = new Vector2(
+        e.nativeEvent.offsetX + leftCornerx,
+        e.nativeEvent.offsetY + leftCornery
+      );
 
-    this.mouse = m;
-    // console.log(m);
-    this.change = true;
-    this.socket.emit("state", {
-      gameId: this.gameId,
-      playerId: this.playerNumber,
-      mouseInfo: m,
-    //   angle: newAngle 
-    });
+      this.mouse = m;
+      // console.log(m);
+      this.change = true;
+      this.socket.emit("state", {
+        gameId: this.gameId,
+        playerId: this.playerNumber,
+        mouseInfo: m
+      });
+    }
   };
 
   drawPlayers = () => {
@@ -182,6 +173,7 @@ class Game extends React.Component {
     let canvas = this.getCavasPosition();
 
     for (let i = 0; i < this.players.length; i++) {
+      if (this.players[i].dead) continue;
       if (i !== this.playerNumber) {
         if (this.inCanvas(this.players[i].pos)) {
           ctx.save();
@@ -247,7 +239,7 @@ class Game extends React.Component {
           pos.x <= canvas.x + this.game_data.canvas.width &&
           pos.y >= canvas.y &&
           pos.y <= canvas.y + this.game_data.canvas.height){
-            return true
+            return true;
           } else {
             return false;
           }
@@ -260,7 +252,6 @@ class Game extends React.Component {
         if (this.inCanvas(this.players[i].bullets[b].pos)){
           let canvas = this.getCavasPosition();
           ctx.save();
-          console.log(this.players[i].bullets);
           ctx.translate(
             this.players[i].bullets[b].pos.x - canvas.x,
             this.players[i].bullets[b].pos.y - canvas.y
@@ -284,7 +275,8 @@ class Game extends React.Component {
 
   update = () => {
     // console.log(this.players); 
-    if (this.ready == 2){
+    if (this.gameOver) console.log("GAMEOVER");
+    if (this.playing && !this.gameOver){
         this.drawPlayers();
         this.drawBullets();
     }
@@ -318,31 +310,30 @@ class Game extends React.Component {
   };
 
   updateGame = data => {
-    this.ready = data.readyPlayers;
     this.players = data.playersInfo;
   }
 
+  dead = data => {
+    console.log("FINISHED");
+    this.gameOver = true;
+  }
+
   initGame = data => {
-    // console.log(data.gameId);
-    this.players = data.playersInfo;
-    // console.log(this.players.length);
     this.gameId = data.gameId;
     this.playerNumber = data.player;
-    this.init = true;
+  };
 
-    this.socket.emit("ready", {
-      gameId: this.gameId,
-      player: this.playerNumber
-    });
+  play = data => {
+    this.players = data.playersInfo;
+    this.playing = true;
 
     this.socket.on("update", this.updateGame);
+    this.socket.on("gameover", this.dead);
     document.addEventListener("keydown", this.fire, false);
-
-    // console.log(this.init);
     setInterval(() => {
       this.update();
     }, 1000 / 100);
-  };
+  }
 
   
 
@@ -364,7 +355,8 @@ class Game extends React.Component {
       .then(data => this.setState({ renderResponse: data }))
       .catch(err => console.log(err));
     
-
+    this.socket.emit("choice", {type: Math.floor(Math.random() * 4) });
+    this.socket.on("play", this.play);
     this.socket.on("init", this.initGame);
   }
 
