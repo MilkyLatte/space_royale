@@ -27,13 +27,13 @@ class Game extends React.Component {
         height: 10
       },
       canvas: {
-        width: 800,
-        height: 500
+        width: 1000,
+        height: 600
       },
       background: { 
         size: {
           x: 2000,
-          y: 1000
+          y: 2000
         },
         sprites: 0
       },
@@ -442,11 +442,21 @@ class Game extends React.Component {
       });
 
     //for background
-    // fetch("api/background")
-    //   .then(res => res.json())
-    //   .then(data => {
-    //     img.src = `data:image/png;base64, ${data.express}`;
-    //   });
+
+  }
+
+  bgloader = (img) => {
+    this.game_data.background.sprites = img;
+  }
+
+  loadBackground = () => {
+    let img = new Image();
+    img.onload = this.bgloader(img);
+    fetch("api/background")
+      .then(res => res.json())
+      .then(data => {
+        img.src = `data:image/png;base64, ${data.express}`;
+      });
   }
 
   componentDidMount() {
@@ -454,6 +464,7 @@ class Game extends React.Component {
     bg.onload = this.loadMap(bg);
     bg.src = background;
 
+    this.loadBackground();
     this.loadShips();
     this.loadUIElements();
 

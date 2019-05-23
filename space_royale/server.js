@@ -237,7 +237,7 @@ class Game {
         this.gameOver = false;
         this.capacity = playerCount;
         this.players = [];
-        this.size = new THREE.Vector3(2000, 1000);
+        this.size = new THREE.Vector3(2000, 2000);
         this.sockets = [];
     }
 
