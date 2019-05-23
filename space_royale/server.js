@@ -12,7 +12,7 @@ const sizeof = require("object-sizeof");
 var ships = {};
 var hpBars = {};
 var bulletCounter = {};
-
+var background = {}
 
 
 const app = express();
@@ -84,11 +84,17 @@ app.get('/api/hp', (req, res) => {
 }); 
 
 app.get('/api/bulletCounter', (req, res) => {
-    var sendInfo = {};
 
     fs.readFile(__dirname + bulletCounter[0], 'base64', (err, base64Image) => {
         res.send({express: base64Image});
         console.log("Sent bullet counter to client".blue)
+    });
+})
+
+app.get('/api/background', (req, res) => {
+    fs.readFile(__dirname + background[0], 'base64', (err, base64Image) => {
+        res.send({express: base64Image});
+        console.log("Sent background to client".blue)
     });
 })
 
@@ -120,7 +126,7 @@ db.each(ship_table, (err, row) => {
 
 ////////////////////////////////////////////
 
-let hp_Bar_Table = 'SELECT id, filePath FROM UI_HP_Bars_And_Bullets ORDER BY id';
+let hp_Bar_Table = 'SELECT id, filePath FROM UI_HP_Bar_Bullets_Background ORDER BY id';
 
 // Access hp bar and bullet counter database
 db.each(hp_Bar_Table, (err, row) =>  {
@@ -128,10 +134,14 @@ db.each(hp_Bar_Table, (err, row) =>  {
         throw err;
     }
 
-    if (row.id != 12) hpBars[row.id] = row.filePath;
-    else {
+    if (row.id != 12 && row.id != 13) hpBars[row.id] = row.filePath;
+    if (row.id == 12) {
         bulletCounter[0] = row.filePath;
-        console.log(bulletCounter[0]);
+        console.log(bulletCounter[0].blue);
+    }
+    if (row.id == 13) {
+        background[0] = row.filePath;
+        console.log(background[0].blue);
     }
 });
 /////////////////////////////////////////////////

@@ -440,6 +440,13 @@ class Game extends React.Component {
       .then(data => {
         img.src = `data:image/svg+xml;base64, ${data.express}`;
       });
+
+    //for background
+    // fetch("api/background")
+    //   .then(res => res.json())
+    //   .then(data => {
+    //     img.src = `data:image/png;base64, ${data.express}`;
+    //   });
   }
 
   componentDidMount() {
