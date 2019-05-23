@@ -439,6 +439,7 @@ class Game extends React.Component {
       .then(res => res.json())
       .then(data => {
         img.src = `data:image/svg+xml;base64, ${data.express}`;
+        //ddd
       });
 
     //for background
@@ -446,7 +447,7 @@ class Game extends React.Component {
   }
 
   bgloader = (img) => {
-    this.game_data.background.sprites = img;
+    this.game_data.background.sprites = img; 
   }
 
   loadBackground = () => {
@@ -455,7 +456,7 @@ class Game extends React.Component {
     fetch("api/background")
       .then(res => res.json())
       .then(data => {
-        img.src = `data:image/png;base64, ${data.express}`;
+        img.src = `data:image/png;base64, ${data.express}`; 
       });
   }
 

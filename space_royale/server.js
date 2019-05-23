@@ -65,9 +65,8 @@ app.get('/api/ships', (req, res) => {
 
     convertAllShipsImages().then(function(imageJSON) {
         res.send({express: imageJSON});
-        console.log("Sent ships to client".blue)
     }, function(err) {
-        throw(err);
+        throw err;
     });
 });
 
@@ -76,9 +75,8 @@ app.get('/api/ships', (req, res) => {
 app.get('/api/hp', (req, res) => {
     convertAllhpImages().then(function(imageJSON) {
         res.send({express:imageJSON});
-        console.log("Sent hp bars to client".blue);
     }, function(err) {
-        throw(err);
+        throw err;
     });
     
 }); 
@@ -87,14 +85,15 @@ app.get('/api/bulletCounter', (req, res) => {
 
     fs.readFile(__dirname + bulletCounter[0], 'base64', (err, base64Image) => {
         res.send({express: base64Image});
-        console.log("Sent bullet counter to client".blue)
     });
 })
 
 app.get('/api/background', (req, res) => {
     fs.readFile(__dirname + background[0], 'base64', (err, base64Image) => {
+        
+        if (err) throw err;
+
         res.send({express: base64Image});
-        console.log("Sent background to client".blue)
     });
 })
 
@@ -504,12 +503,12 @@ io.on('connection', function(socket){
             socket.emit("update", {
               playersInfo: players,
             });
-        }
-        if (socket.disconnected) {
-            master.games[GAMEID].disconnected += 1;
-            socket.disconnect();
-            console.log("DISCONNECTED");
-            clearInterval(mainLoop);
+            if (socket.disconnected) {
+                master.games[GAMEID].disconnected += 1;
+                socket.disconnect();
+                console.log("DISCONNECTED");
+                clearInterval(mainLoop); 
+            }
         }
 
     }
