@@ -214,11 +214,99 @@ class Player {
         }; 
         return corners;
     }
+
+    shoot(){
+        switch (this.type) {
+            case 0:
+            {
+                let p1 = this.pos.clone();
+                let v = this.velocity.clone();
+                
+                p1.x += 60 * Math.cos(this.angle) + 10 * Math.sin(this.angle);
+                p1.y += -10 * Math.cos(this.angle) + 60 * Math.sin(this.angle);
+                
+                let b = new Bullet(p1, v, this.angle, this.playerNumber, 10, 10)
+                this.bullets.push(b);
+                break;
+            }
+            case 1:
+            {
+                let p1 = this.pos.clone();
+                let v = this.velocity.clone();
+                
+                p1.x += 60 * Math.cos(this.angle) + 10 * Math.sin(this.angle);
+                p1.y += -10 * Math.cos(this.angle) + 60 * Math.sin(this.angle);
+                
+                let b = new Bullet(p1, v, this.angle, this.playerNumber, 10, 10)
+                this.bullets.push(b);
+                break;
+            }
+            case 2:
+            {
+                let p1 = this.pos.clone();
+                let p2 = this.pos.clone();
+                let p3 = this.pos.clone();
+                let p4 = this.pos.clone();
+                let v = this.velocity.clone();
+                
+                p1.x += 20 * Math.cos(this.angle) + 50 * Math.sin(this.angle);
+                p1.y += -50 * Math.cos(this.angle) + 20 * Math.sin(this.angle);
+
+                p2.x += 20 * Math.cos(this.angle) + 70 * Math.sin(this.angle);
+                p2.y += -70 * Math.cos(this.angle) + 20 * Math.sin(this.angle);
+
+                p3.x += 20 * Math.cos(this.angle) - 30 * Math.sin(this.angle);
+                p3.y += 30 * Math.cos(this.angle) + 20 * Math.sin(this.angle);
+
+                p4.x += 20 * Math.cos(this.angle) - 50 * Math.sin(this.angle);
+                p4.y += 50 * Math.cos(this.angle) + 20 * Math.sin(this.angle);
+                
+                
+                let b = new Bullet(p1, v, this.angle, this.playerNumber, 6, 5)
+                let b1 = new Bullet(p2, v, this.angle, this.playerNumber, 6, 5)
+                let b2 = new Bullet(p3, v, this.angle, this.playerNumber, 6, 5)
+                let b3 = new Bullet(p4, v, this.angle, this.playerNumber, 6, 5)
+
+                this.bullets.push(b);
+                this.bullets.push(b1);
+                this.bullets.push(b2);
+                this.bullets.push(b3);
+
+                break;
+            }
+            case 3:
+            {
+                let p1 = this.pos.clone();
+                let p2 = this.pos.clone();
+
+                let v = this.velocity.clone();
+                
+                p1.x += 100 * Math.cos(this.angle) + 65 * Math.sin(this.angle);
+                p1.y += -65 * Math.cos(this.angle) + 100 * Math.sin(this.angle);
+
+                p2.x += 100 * Math.cos(this.angle) - 50 * Math.sin(this.angle);
+                p2.y += 50 * Math.cos(this.angle) + 100 * Math.sin(this.angle);
+                
+                let b = new Bullet(p1, v, this.angle, this.playerNumber, 10, 10)
+                let b1 = new Bullet(p2, v, this.angle, this.playerNumber, 10, 10)
+
+                this.bullets.push(b);
+                this.bullets.push(b1);
+
+
+                break;
+            }
+        
+            default:
+                break;
+        }
+    }
 }
 
 class Bullet {
-    constructor(pos, velocity, angle, player){
-        this.damage = 10;
+    constructor(pos, velocity, angle, player, acceleration, damage){
+        this.damage = damage;
+        this.acceleration = acceleration;
         this.velocity = velocity;
         this.pos = pos;
         this.distanceTravelled = 0;
@@ -255,7 +343,7 @@ class Game {
                 newPlayer = new Player(2, id, currentPlayer, 2, 100, 150, 150, 30, 200);
                 break;
             case 3:
-                newPlayer = new Player(3, id, currentPlayer, 2, 100, 200, 200, 20, 200);
+                newPlayer = new Player(3, id, currentPlayer, 2, 100, 200, 200, 20, 100);
                 break;
             default:
                 break;
@@ -265,6 +353,7 @@ class Game {
     }
 
     movePlayer() {
+        let wall = 100;
         for (let i = 0; i < this.players.length; i++) {
             if (this.players[i].dead) continue;
             let difference = this.players[i].mouse.clone();
@@ -276,34 +365,34 @@ class Game {
                 this.players[i].pos.add(v.multiplyScalar(this.players[i].acceleration));
                 let newAngle = Math.atan2(difference.y, difference.x);
                 this.players[i].angle = newAngle;
-                if (this.players[i].pos.x < 0) {
-                    this.players[i].pos.x = 0
+                if (this.players[i].pos.x < wall) {
+                    this.players[i].pos.x = wall
                 }
-                if (this.players[i].pos.y < 0) {
-                    this.players[i].pos.y = 0
+                if (this.players[i].pos.y < wall) {
+                    this.players[i].pos.y = wall
                 }
-                if (this.players[i].pos.x > this.size.x) {
-                    this.players[i].pos.x = this.size.x;
+                if (this.players[i].pos.x > this.size.x-wall) {
+                    this.players[i].pos.x = this.size.x-wall;
                 }
-                if (this.players[i].pos.y > this.size.y) {
-                    this.players[i].pos.y = this.size.y;
+                if (this.players[i].pos.y > this.size.y-wall) {
+                    this.players[i].pos.y = this.size.y-wall;
                 }
                 this.players[i].change = false;
             } else {
                 let v = this.players[i].velocity.clone();
                 this.players[i].pos.add(
                   v.multiplyScalar(this.players[i].acceleration));
-                if (this.players[i].pos.x < 0) {
-                    this.players[i].pos.x = 0
+                if (this.players[i].pos.x < wall) {
+                    this.players[i].pos.x = wall
                 }
-                if (this.players[i].pos.y < 0) {
-                    this.players[i].pos.y = 0
+                if (this.players[i].pos.y < wall) {
+                    this.players[i].pos.y = wall
                 }
-                if (this.players[i].pos.x > this.size.x) {
-                    this.players[i].pos.x =  this.size.x;
+                if (this.players[i].pos.x > this.size.x-wall) {
+                    this.players[i].pos.x =  this.size.x-wall;
                 }
-                if (this.players[i].pos.y >  this.size.y) {
-                    this.players[i].pos.y =  this.size.y;
+                if (this.players[i].pos.y >  this.size.y-wall) {
+                    this.players[i].pos.y =  this.size.y-wall;
                 }
             }
         }
@@ -315,7 +404,8 @@ class Game {
             for (let i = 0; i < this.players[p].bullets.length; i++){ 
                 let v = this.players[p].bullets[i].velocity.clone();
                 this.players[p].bullets[i].pos.add(
-                  v.multiplyScalar(5));
+                  v.multiplyScalar(this.players[p].bullets[i].acceleration)
+                );
                 this.players[p].bullets[i].distanceTravelled += 1;
                 let collision = this.checkCollision(p, this.players[p].bullets[i].pos);
                 if  (collision !== -1){
@@ -353,7 +443,7 @@ class Game {
     cleanUp(){
          for (let p = 0; p < this.players.length; p++){
             for (let i = 0; i < this.players[p].bullets.length; i++){ 
-                if (this.players[p].bullets[i].distanceTravelled > 500) {
+                if (this.players[p].bullets[i].distanceTravelled > 100) {
                     this.players[p].bullets.splice(i, 1);
                 }
             }
@@ -429,10 +519,13 @@ io.on('connection', function(socket){
         }
 
         if (!added){
-            let newGame = new Game(2, master.games.length);
+            let newGame = new Game(1, master.games.length);
             newGame.playGame();
             playerID = newGame.join(socket.id, data.type);
             GAMEID = master.newGame(newGame);
+            if (master.games[GAMEID].players.length == master.games[GAMEID].capacity) {
+                master.games[GAMEID].playing = true;
+            }
             socket.emit('init', { gameId: GAMEID, player: playerID});
         }
         master.games[GAMEID].players[playerID].ready = true;
@@ -455,22 +548,23 @@ io.on('connection', function(socket){
 
     socket.on('fire', function(data){
         let now = (new Date).getTime();
-        if (now - lastBullet > master.games[GAMEID].players[playerID].bulletCooldown) {
-            let p1 = master.games[GAMEID].players[playerID].pos.clone();
-            let p2 = master.games[GAMEID].players[playerID].pos.clone();
+        if (now - lastBullet > master.games[GAMEID].players[playerID].bulletCooldown){
+            master.games[GAMEID].players[playerID].shoot();
+            // let p1 = master.games[GAMEID].players[playerID].pos.clone();
+            // let p2 = master.games[GAMEID].players[playerID].pos.clone();
     
-            let v = master.games[GAMEID].players[playerID].velocity.clone();
-            let angle = master.games[GAMEID].players[playerID].angle;
+            // let v = master.games[GAMEID].players[playerID].velocity.clone();
+            // let angle = master.games[GAMEID].players[playerID].angle;
     
-            p1.x += 25 * Math.cos(angle) + 25 * Math.sin(angle);
-            p1.y +=  - 25 * Math.cos(angle) +  25 * Math.sin(angle);
-            let bullet = new Bullet(
-              p1,
-              v,
-              angle,
-              playerID
-            );
-            master.games[GAMEID].players[playerID].bullets.push(bullet);
+            // p1.x += 25 * Math.cos(angle) + 25 * Math.sin(angle);
+            // p1.y +=  - 25 * Math.cos(angle) +  25 * Math.sin(angle);
+            // let bullet = new Bullet(
+            //   p1,
+            //   v,
+            //   angle,
+            //   playerID
+            // );
+            // master.games[GAMEID].players[playerID].bullets.push(bullet);
             lastBullet = now;
         }
     })
