@@ -1,12 +1,9 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import "../App.css";
-import spaceship from "./rocket.png";
 import background from "./map.png";
-import bullet from "./bullet.png"
 import { Vector2 } from "three";
-import { resolve } from "url";
 import io from "socket.io-client";
+import * as sizeof from "object-sizeof";
 
 class Ship {
   constructor(width, height, img){
@@ -52,7 +49,7 @@ class Game extends React.Component {
     this.mouse = new Vector2(50, 100);
     this.change = false;
     this.playerNumber = 0;
-    this.socket = io.connect("http://localhost:5000");
+    this.socket = io.connect("http://localhost:5000/");
     this.gameId = 0;
     this.gameOver = false;
   }
@@ -174,9 +171,18 @@ class Game extends React.Component {
       ctx.translate(leftCornerx, leftCornery);
 
       ctx.rotate(this.players[this.playerNumber].angle + 90 * (Math.PI / 180));
-      ctx.translate(-50, -50);
+      ctx.translate(
+        -this.game_data.rockets[this.players[this.playerNumber].type].width/2,
+        -this.game_data.rockets[this.players[this.playerNumber].type].height/2
+      );
 
-      ctx.drawImage(this.game_data.rockets[this.players[this.playerNumber].type].image, 0, 0, 100, 100);
+      ctx.drawImage(
+        this.game_data.rockets[this.players[this.playerNumber].type].image,
+        0,
+        0,
+        this.game_data.rockets[this.players[this.playerNumber].type].width,
+        this.game_data.rockets[this.players[this.playerNumber].type].height
+      );
       ctx.restore();
     }
 
@@ -192,10 +198,16 @@ class Game extends React.Component {
           // console.log(this.players[i].pos);
 
           ctx.rotate(this.players[i].angle + 90 * (Math.PI / 180));
-          ctx.translate(-50, -50);
+          ctx.translate(        
+            -this.game_data.rockets[this.players[i].type].width/2,
+            -this.game_data.rockets[this.players[i].type].height/2);
 
           ctx.drawImage(
-            this.game_data.rockets[this.players[i].type].image,0,0,100,100
+            this.game_data.rockets[this.players[i].type].image,
+            0,
+            0,
+            this.game_data.rockets[this.players[i].type].width,
+            this.game_data.rockets[this.players[i].type].height
           );
           ctx.restore();
         }
@@ -301,8 +313,24 @@ class Game extends React.Component {
     }
   }
 
-  loadCharacter = img => {
-    this.game_data.rockets.push(new Ship(50, 50, img))
+  loadCharacter = (img, type) => {
+    switch (type) {
+      case 0:
+        this.game_data.rockets.push(new Ship(100, 100, img));
+        break;
+      case 1:
+        this.game_data.rockets.push(new Ship(125, 125, img));
+        break;
+      case 2:
+        this.game_data.rockets.push(new Ship(150, 150, img));
+        break;
+      case 3:
+        this.game_data.rockets.push(new Ship(200, 200, img));
+        break;
+      default:
+        break;
+    }
+    
     // this.game_data.ships.fast.sprites = img;
     // this.setState({image: img})
   };
@@ -323,8 +351,25 @@ class Game extends React.Component {
     this.setState({ change: false });
   };
 
+  interpolate = data => {
+    console.log(data.playersInfo[0])
+    for (let i = 0; i < data.playersInfo.length; i++){
+      this.players[i].health = data.playersInfo[i].health;
+      this.players[i].dead = data.playersInfo[i].dead;
+
+      this.players[i].bullets = data.playersInfo[i].bullets;
+      this.players[i].pos.x = (this.players[i].pos.x + data.playersInfo[i].pos.x)/2; 
+      this.players[i].pos.y = (this.players[i].pos.y + data.playersInfo[i].pos.y)/2; 
+      this.players[i].angle = data.playersInfo[i].angle; 
+    }
+  }
+
   updateGame = data => {
-    this.players = data.playersInfo;
+    // if (this.playing){
+    //   console.log(sizeof(data));
+    this.interpolate(data);
+    // }
+    // this.players = data.playersInfo;
   }
 
   dead = data => {
@@ -362,7 +407,7 @@ class Game extends React.Component {
         continue;
       }
       let img = new Image();
-      img.onload = this.loadCharacter(img);
+      img.onload = this.loadCharacter(img, i);
       fetch("api/ships")
         .then(res => res.json())
         .then(data => {

@@ -6,6 +6,8 @@ const sqlite3 = require("sqlite3").verbose();
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const color = require('colors');
+const sizeof = require("object-sizeof");
+
 
 var ships = {};
 var hpBars = {};
@@ -185,20 +187,20 @@ class Player {
         let size = 15;
         let corners = {
           leftUp: {
-            x: this.pos.x - size,
-            y: this.pos.y - size
+            x: this.pos.x - (this.width-50)/2,
+            y: this.pos.y - (this.height-50)/2
           },
           rightUp: {
-            x: this.pos.x + size,
-            y: this.pos.y - size
+            x: this.pos.x + (this.width-50)/2,
+            y: this.pos.y - (this.height-50)/2
           },
           leftDown: { 
-            x: this.pos.x - size,
-            y: this.pos.y + size
+            x: this.pos.x - (this.width-50)/2,
+            y: this.pos.y + (this.height-50)/2
           },
           rightDown: {
-            x: this.pos.x + size,
-            y: this.pos.y + size
+            x: this.pos.x + (this.width-50)/2,
+            y: this.pos.y + (this.height-50)/2
           }
         }; 
         return corners;
@@ -219,6 +221,7 @@ class Bullet {
 class Game {
     constructor(playerCount, id) {
         this.ready = 0
+        this.disconnected = 0;
         this.gameId = id;
         this.playing = false;
         this.gameOver = false;
@@ -233,17 +236,17 @@ class Game {
         let newPlayer;
         switch (type) {
             case 0:
-                newPlayer = new Player(0, id, currentPlayer, 4, 60, 50, 50, 10, 200);
+                newPlayer = new Player(0, id, currentPlayer, 4, 60, 100, 100, 10, 200);
                 
                 break;
             case 1:
-                newPlayer = new Player(1, id, currentPlayer, 3, 90, 60, 60, 15, 200);
+                newPlayer = new Player(1, id, currentPlayer, 3, 90, 125, 125, 15, 200);
                 break;
             case 2:
-                newPlayer = new Player(2, id, currentPlayer, 2, 100, 100, 100, 30, 200);
+                newPlayer = new Player(2, id, currentPlayer, 2, 100, 150, 150, 30, 200);
                 break;
             case 3:
-                newPlayer = new Player(3, id, currentPlayer, 2, 100, 90, 90, 20, 200);
+                newPlayer = new Player(3, id, currentPlayer, 2, 100, 200, 200, 20, 200);
                 break;
             default:
                 break;
@@ -341,7 +344,7 @@ class Game {
     cleanUp(){
          for (let p = 0; p < this.players.length; p++){
             for (let i = 0; i < this.players[p].bullets.length; i++){ 
-                if (this.players[p].bullets[i].distanceTravelled > 1000) {
+                if (this.players[p].bullets[i].distanceTravelled > 500) {
                     this.players[p].bullets.splice(i, 1);
                 }
             }
@@ -359,7 +362,7 @@ class Game {
     }
 
     playGame() {
-        this.playing = true;
+        // this.playing = true;
         this.update();
     }
 }
@@ -377,9 +380,11 @@ class Master {
 
     playGames(){
         setInterval(() => {
-            this.games.forEach(game => {
-                game.playGame();
-            });
+            for (let i = 0; i < this.games.length; i++){
+                if (this.games[i].disconnected == this.games[i].capacity) continue;
+                this.games[i].playGame();
+            }
+
         }, 1000/100)
     }
 }
@@ -404,6 +409,7 @@ io.on('connection', function(socket){
             if (master.games[i].players.length < master.games[i].capacity){
                 playerID = master.games[i].join(socket.id, data.type);
                 GAMEID = i;
+                console.log(master.games[GAMEID].players.length);
                 if (master.games[GAMEID].players.length == master.games[i].capacity) {
                     master.games[GAMEID].playing = true;
                 }
@@ -412,6 +418,7 @@ io.on('connection', function(socket){
                 break;
             }
         }
+
         if (!added){
             let newGame = new Game(2, master.games.length);
             newGame.playGame();
@@ -440,7 +447,6 @@ io.on('connection', function(socket){
     socket.on('fire', function(data){
         let now = (new Date).getTime();
         if (now - lastBullet > master.games[GAMEID].players[playerID].bulletCooldown) {
-            console.log("HERE");
             let p1 = master.games[GAMEID].players[playerID].pos.clone();
             let p2 = master.games[GAMEID].players[playerID].pos.clone();
     
@@ -465,8 +471,8 @@ io.on('connection', function(socket){
     function gameStart(){
         if (connected){
             if (master.games[GAMEID].playing){
-                playing = true;
                 socket.emit("play", {playersInfo: master.games[GAMEID].players})
+                playing = true;
                 console.log("INTERVAAAAL");
                 clearInterval(interval);
             }
@@ -476,6 +482,8 @@ io.on('connection', function(socket){
     let mainLoop = setInterval(updater, 1000/100)
     function updater(){
         if (playing) {
+            // console.log("HERE");
+
             if (master.games[GAMEID].players[playerID].dead){
                 socket.emit("gameover", {gameOver: true});
             }
@@ -488,6 +496,7 @@ io.on('connection', function(socket){
             });
         }
         if (socket.disconnected) {
+            master.games[GAMEID].disconnected += 1;
             socket.disconnect();
             console.log("DISCONNECTED");
             clearInterval(mainLoop);
