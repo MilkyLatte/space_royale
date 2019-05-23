@@ -17,6 +17,9 @@ var background = {}
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+app.set('view engine', 'ejs');
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -519,7 +522,7 @@ io.on('connection', function(socket){
         }
 
         if (!added){
-            let newGame = new Game(1, master.games.length);
+            let newGame = new Game(2, master.games.length);
             newGame.playGame();
             playerID = newGame.join(socket.id, data.type);
             GAMEID = master.newGame(newGame);
