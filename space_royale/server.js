@@ -7,7 +7,9 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const color = require('colors');
 const sizeof = require("object-sizeof");
+const bcrypt = require('bcrypt');
 
+const saltRounds = 10;
 
 var ships = {};
 var hpBars = {};
@@ -33,6 +35,16 @@ app.post('/api/world', (req, res) => {
         `I received your POST request. This is what you sent me: ${req.body.post}`,
     );
 });
+
+function hashPassword(data){
+
+    return new Promise((fulfill, reject) => {
+        bcrypt.hash(data, saltRounds, (err, hashed) => {
+            if (err) reject(err)
+            else fulfill(hashed);
+        });
+    })
+}
 
 function convertImage(imagePath) {
     return fs.readFileAsync(__dirname + imagePath, 'base64')
@@ -100,6 +112,19 @@ app.get('/api/background', (req, res) => {
     });
 })
 
+app.post('/api/googleRegister', (req, res) => {
+    const { id, username, email } = req.body;
+    
+    hashPassword(username).done((hashedUserName) => {
+        hashPassword(email).done((hashedemail) => {
+            insertGoogleUser(id, hashedUserName, hashedemail).done((success) => {
+                res.send(success);
+            });
+            // res.send({id: hashedId, name: hashedName, email: hashedemail});
+        });
+    });
+})
+
 
 ////////////////////////////////////////////////////
 
@@ -156,6 +181,81 @@ db.close((err) => {
 
     console.log('Closed the database connection'.blue);
 })
+///////////////////////////////////////////////////
+
+// Check if user is already in database //////////
+function checkExist(id, db, table) {
+    
+    let googleTable = 'SELECT EXISTS(SELECT 1 FROM ' + table + ' WHERE id =' + id + ')';
+    let check = 'EXISTS(SELECT 1 FROM Google_User WHERE id =' + id + ')';
+    
+    return new Promise((fulfill, reject) => {
+        db.serialize( function() {
+            db.each(googleTable, (err, row) => {
+                if (err) {
+                    console.error(err.message);
+                    reject(err);
+                };
+                console.log(row);
+                if (row[check] == 1) {
+                    fulfill({exist:true});
+                } else {
+                    fulfill({exist: false});
+                }
+            });
+        });
+    });    
+}
+    
+
+// Insert user to database ///////////////////////
+function insertGoogleUser(id, username, email) {
+    // Database connection
+    return new Promise((fulfill, reject) => {
+        
+        let db = new sqlite3.Database('./Database/game_database', (err) => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            };
+        
+            console.log('Connected to the google login database'.blue);
+        });
+    
+        checkExist(id, db, 'Google_User')
+            .then(res => {
+                if (res.exist == true) {
+                    fulfill({exist: true, inserted: false});
+                }
+                else {
+                    console.log("Here");
+                    db.run('INSERT INTO Google_User VALUES(?, ?, ?)', [id, username, email], (err) => {
+                        if (err) {
+                            console.error(err.message);
+                            reject(err);
+                        }
+                        console.log("Added new user to google database".blue);
+                        fulfill({exist: false, inserted: true});
+                    })
+                    db.close((err) => {
+                        if (err) {
+                            console.error(err.message);
+                            reject(err);
+                        };
+                
+                        console.log('Closed google database'.blue);
+                    }); 
+                }
+            })
+            .catch((err) => {
+                console.error(err.message);
+                reject(err);
+            })
+
+    });
+
+};
+/////////////////////////////////////////////
 
 // Game Logic
 
@@ -553,6 +653,21 @@ io.on('connection', function(socket){
         let now = (new Date).getTime();
         if (now - lastBullet > master.games[GAMEID].players[playerID].bulletCooldown){
             master.games[GAMEID].players[playerID].shoot();
+            // let p1 = master.games[GAMEID].players[playerID].pos.clone();
+            // let p2 = master.games[GAMEID].players[playerID].pos.clone();
+    
+            // let v = master.games[GAMEID].players[playerID].velocity.clone();
+            // let angle = master.games[GAMEID].players[playerID].angle;
+    
+            // p1.x += 25 * Math.cos(angle) + 25 * Math.sin(angle);
+            // p1.y +=  - 25 * Math.cos(angle) +  25 * Math.sin(angle);
+            // let bullet = new Bullet(
+            //   p1,
+            //   v,
+            //   angle,
+            //   playerID
+            // );
+            // master.games[GAMEID].players[playerID].bullets.push(bullet);
             lastBullet = now;
         }
     })
@@ -595,4 +710,3 @@ io.on('connection', function(socket){
 
     }
 });
-
