@@ -7,7 +7,9 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const color = require('colors');
 const sizeof = require("object-sizeof");
+const bcrypt = require('bcrypt');
 
+const saltRounds = 10;
 
 var ships = {};
 var hpBars = {};
@@ -33,6 +35,16 @@ app.post('/api/world', (req, res) => {
         `I received your POST request. This is what you sent me: ${req.body.post}`,
     );
 });
+
+function hashPassword(password){
+    bcrypt.hash(password, saltRounds, (err, hashedPassword) => {
+        if (err) {
+            next(err);
+        } else {
+            console.log(hashedPassword.blue);
+        }
+    });
+}
 
 function convertImage(imagePath) {
     return fs.readFileAsync(__dirname + imagePath, 'base64')
@@ -98,6 +110,11 @@ app.get('/api/background', (req, res) => {
 
         res.send({express: base64Image});
     });
+})
+
+app.post('/api/register', (req, res) => {
+    const { password } = req.body;
+    hashPassword(password);
 })
 
 
