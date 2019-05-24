@@ -553,21 +553,6 @@ io.on('connection', function(socket){
         let now = (new Date).getTime();
         if (now - lastBullet > master.games[GAMEID].players[playerID].bulletCooldown){
             master.games[GAMEID].players[playerID].shoot();
-            // let p1 = master.games[GAMEID].players[playerID].pos.clone();
-            // let p2 = master.games[GAMEID].players[playerID].pos.clone();
-    
-            // let v = master.games[GAMEID].players[playerID].velocity.clone();
-            // let angle = master.games[GAMEID].players[playerID].angle;
-    
-            // p1.x += 25 * Math.cos(angle) + 25 * Math.sin(angle);
-            // p1.y +=  - 25 * Math.cos(angle) +  25 * Math.sin(angle);
-            // let bullet = new Bullet(
-            //   p1,
-            //   v,
-            //   angle,
-            //   playerID
-            // );
-            // master.games[GAMEID].players[playerID].bullets.push(bullet);
             lastBullet = now;
         }
     })

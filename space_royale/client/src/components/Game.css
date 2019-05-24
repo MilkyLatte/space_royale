@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css?family=VT323&display=swap');
+
+.game {
+    padding: 0;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

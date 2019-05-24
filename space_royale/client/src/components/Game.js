@@ -1,5 +1,6 @@
 import React from "react";
-import "../App.css";
+import "./Game.css";
+
 import { Vector2 } from "three";
 import io from "socket.io-client";
 import * as sizeof from "object-sizeof";
@@ -41,13 +42,14 @@ class Game extends React.Component {
     };
     this.players = [];
     this.placeholder = [];
-
+    this.loading = 200;
     this.mouse = new Vector2(50, 100);
     this.change = false;
     this.playerNumber = 0;
     this.socket = io.connect("http://localhost:5000/");
     this.gameId = 0;
     this.gameOver = false;
+    this.unmounted = false;
   }
 
   state = {
@@ -89,10 +91,7 @@ class Game extends React.Component {
       });
     }
   };
-
-  drawPlayers = () => {
-    let halfx = this.game_data.canvas.width / 2;
-    let halfy = this.game_data.canvas.height / 2;
+  drawLoading = () => {
     const ctx = this.refs.canvas.getContext("2d");
     ctx.fillStyle = "green";
     ctx.fillRect(
@@ -101,6 +100,44 @@ class Game extends React.Component {
       this.game_data.canvas.width,
       this.game_data.canvas.height
     );
+
+    ctx.font = "68px VT323";
+
+    ctx.fillStyle = "white";
+    ctx.fillText(
+      "Loading...",
+      this.game_data.canvas.width / 2 -100,
+      this.game_data.canvas.height / 2
+    );
+
+    ctx.save();
+    ctx.translate(this.loading, this.game_data.canvas.height/2 + 40);
+
+    ctx.rotate(90 * (Math.PI / 180));
+    ctx.translate(
+      -this.game_data.rockets[0].width / 2,
+      -this.game_data.rockets[0].height / 2
+    );
+
+    ctx.drawImage(
+      this.game_data.rockets[0].image,
+      0,
+      0,
+      this.game_data.rockets[0].width,
+      this.game_data.rockets[0].height
+    );
+    ctx.restore();
+
+    this.loading += 1;
+    if (this.loading > 800) this.loading = 200;
+
+  };
+
+  drawPlayers = () => {
+    let halfx = this.game_data.canvas.width / 2;
+    let halfy = this.game_data.canvas.height / 2;
+    const ctx = this.refs.canvas.getContext("2d");
+
     let dx;
     let dy;
     if (this.players[this.playerNumber].pos.x < halfx) {
@@ -291,11 +328,9 @@ class Game extends React.Component {
     let health = Math.floor(this.players[this.playerNumber].health / 10);
     ctx.drawImage(this.game_data.UI.health[health], 50, 500, 400, 60);
     ctx.drawImage(this.game_data.UI.bullets, 800, 480, 150, 75);
+
   };
   update = () => {
-    // this.game_data.canvas.width = window.innerWidth;
-    // this.game_data.canvas.height = window.innerHeight;
-    // console.log(this.players);
     if (this.gameOver) console.log("GAMEOVER");
     if (this.playing && !this.gameOver) {
       this.drawPlayers();
@@ -349,7 +384,6 @@ class Game extends React.Component {
   };
 
   interpolate = data => {
-    console.log(data.playersInfo[0]);
     for (let i = 0; i < data.playersInfo.length; i++) {
       this.players[i].health = data.playersInfo[i].health;
       this.players[i].dead = data.playersInfo[i].dead;
@@ -466,13 +500,18 @@ class Game extends React.Component {
       .then(res => res.json())
       .then(data => this.setState({ renderResponse: data }))
       .catch(err => console.log(err));
-
-    this.socket.emit("choice", { type: Math.floor(Math.random() * 4) });
+    let loading = setInterval(() => {
+      this.drawLoading();
+      if (this.playing) clearInterval(loading);
+    }, 1000/100)
+    this.socket.emit("choice", { type: this.props.location.state.choice });
     this.socket.on("init", this.initGame);
     this.socket.on("play", this.play);
   }
 
   componentWillUnmount() {
+    this.playing = false;
+    this.socket.disconnect();
     document.removeEventListener("keydown", this.fire, false);
   }
 

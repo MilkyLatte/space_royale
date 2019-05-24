@@ -3,6 +3,9 @@ import Slider from "./Slider";
 import "./Lobby.css"
 import Chart from "./Chart";
 import GoButton from "./GoButton";
+import { Redirect } from 'react-router-dom'
+import { withRouter } from 'react-router'
+
 
 class ShipStats {
     constructor(message, health, speed, firepower) {
@@ -10,6 +13,7 @@ class ShipStats {
         this.health = health;
         this.speed = speed;
         this.firepower = firepower;
+        this.redirect = false;
     }
 }
 
@@ -58,7 +62,6 @@ class Lobby extends React.Component {
     }
 
     rightClick = () => {
-        console.log("HERE")
         let value = (this.state.current + 1) % 4;
         this.setState({ current: value })
     }
@@ -70,8 +73,18 @@ class Lobby extends React.Component {
 
     }
 
+    redirect = (e) => {
+        this.setState({redirect: true})
+    }
+
 
     render(){
+        if (this.state.redirect) {
+            return <Redirect push to={{
+                pathname: '/game',
+                state: { choice: this.state.current }
+            }}/>
+        }
         return(
             <div className="container">
                 <div className="row" id="main-row">
@@ -89,8 +102,8 @@ class Lobby extends React.Component {
                     <div className="col-12">
                                 <Chart description={this.state.stats[this.state.current]}></Chart>
                     </div>
-                    <div className="col-12">
-                        <GoButton></GoButton>
+                    <div className="col-12" onClick={this.redirect}>
+                        <GoButton />
                     </div>
                     </div>
                 </div>
