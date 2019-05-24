@@ -1,0 +1,108 @@
+
+.main-container {
+    /* position: absolute; */
+    height: 70%;
+    width: 80%;
+    max-width: 1000px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* background-color: blue; */
+    border-radius: 10px;
+    -webkit-box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    -moz-box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    
+}
+
+.login-image {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    /* background-color: blue; */
+
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+
+    background-image: url("./Background.png");
+    /* background-size: cover; */
+    background-position: -800px -800px;
+    background-repeat: no-repeat;
+
+    -webkit-animation: mymove 10s infinite; /* Safari 4.0 - 8.0 */
+    animation: mymove 15s infinite;
+}
+
+@-webkit-keyframes mymove {
+  50% {background-position: -100px -200px;}
+}
+@keyframes mymove {
+  50% {background-position: -100px -200px;}
+}
+
+.row {
+    height: 100%;
+}
+
+.right-login {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(248, 248, 248);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+
+}
+
+.labels {
+    font-size: 1.5rem;
+}
+
+.login-container {
+    padding-top: 20%;
+    padding-left: 10%;
+    padding-right: 10%;
+
+}
+
+.login-button {
+    width: 100%;
+    border-radius: 5px;
+    width: 100%;
+    background-color: #40cfff;
+    height: 3rem;
+    color: white;
+    text-align: center;
+    padding-top: 5px;
+    font-size: 1.5rem;
+    margin-top: 10px;
+    -webkit-box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
+    -moz-box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
+    box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
+}
+
+.login-button:hover{
+    cursor: pointer;
+}
+
+.headline {
+    text-align: center;
+    padding-bottom: 20px;
+}
+.top-part {
+    font-size: 3rem;
+    margin: auto;
+}
+
+#g-button{
+    padding-right: 10px;
+    line-height: 10px;
+    margin-top: 10px;
+}
+
+#or{
+    padding: 0;
+    margin-top: 20px;
+    padding-left: 10px;
+    height: 10px;
+}

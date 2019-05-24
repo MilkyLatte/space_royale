@@ -1,5 +1,5 @@
 import React from "react";
-import "./Game.css";
+import "./style/Game.css";
 
 import { Vector2 } from "three";
 import io from "socket.io-client";
@@ -46,7 +46,7 @@ class Game extends React.Component {
     this.mouse = new Vector2(50, 100);
     this.change = false;
     this.playerNumber = 0;
-    this.socket = io.connect("http://localhost:5000/");
+    this.socket = io.connect("http://192.168.0.13:5000");
     this.gameId = 0;
     this.gameOver = false;
     this.unmounted = false;
@@ -517,18 +517,18 @@ class Game extends React.Component {
 
   render() {
     return (
-      <div className="game">
-        <canvas
-          ref="canvas"
-          width={this.game_data.canvas.width}
-          height={this.game_data.canvas.height}
-          onMouseMove={this.onMouseMove}
-          onMouseEnter={this.onMouseEnter}
-          onMouseLeave={this.onMouseLeave}
-          onKeyDown={this.fire}
-        />
-        <p>{this.state.renderResponse.express}</p>
-      </div>
+        <div id="gameContainer" className="container">
+          <canvas className="gameCanvas"
+            ref="canvas"
+            width={this.game_data.canvas.width}
+            height={this.game_data.canvas.height}
+            onMouseMove={this.onMouseMove}
+            onMouseEnter={this.onMouseEnter}
+            onMouseLeave={this.onMouseLeave}
+            onKeyDown={this.fire}
+          />
+          <p>{this.state.renderResponse.express}</p>
+        </div>
     );
   }
 }

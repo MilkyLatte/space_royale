@@ -5,22 +5,36 @@ import Game from './components/Game.js';
 import Lobby from './components/Lobby';
 import Home from './components/Home'
 import Navbar from './components/Navbar';
+import Login from './components/Login';
 
 
-function App() {
-  return (
-    <BrowserRouter>
-    <Navbar></Navbar>
-    <Switch>
-      <div className="test">      
-        <Route path="/game" component={Game}/>
-        <Route path="/lobby" component={Lobby}/>
-        <Route path ="/home" component={Home}/>
+class App extends React.Component{
+  state = {
+    loggedIn: true
+  }
+
+  navFunction = () => {
+    if (this.state.loggedIn) {
+      return <Navbar></Navbar>
+    }
+  }
+  render(){
+
+    return (
+      <div>
+        <BrowserRouter>
+          {this.navFunction()}
+          {/* <span> .</span> */}
+          <Switch>
+              <Route path="/login" component={Login}></Route>
+              <Route path="/game" component={Game} />
+              <Route path="/lobby" component={Lobby} />
+              <Route path="/home" component={Home} />
+          </Switch>
+        </BrowserRouter>
       </div>
-    </Switch>
-    </BrowserRouter>
-
-  );
+    );
+  }
 }
 
 export default App;

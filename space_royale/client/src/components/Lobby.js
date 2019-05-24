@@ -1,6 +1,6 @@
 import React from "react";
 import Slider from "./Slider";
-import "./Lobby.css"
+import "./style/Lobby.css"
 import Chart from "./Chart";
 import GoButton from "./GoButton";
 import { Redirect } from 'react-router-dom'
@@ -85,31 +85,45 @@ class Lobby extends React.Component {
                 state: { choice: this.state.current }
             }}/>
         }
-        return(
-            <div className="container">
-                <div className="row" id="main-row">
-                <div className="col-7">
-                        <div className="row">
-                            <div className="arrow-button col-1"><i className="fas fa-arrow-circle-left" onClick={this.leftClick} ></i></div>
-                            <div className="col-10">
-                                <Slider source={this.state.rockets[this.state.current]}></Slider>
-                            </div>
-                            <div className="arrow-button col-1"><i className="fas fa-arrow-circle-right" onClick={this.rightClick}></i></div>
-                        </div>
+        return (
+          <div className="container">
+            <div className="row" id="main-row">
+              <div className="col-7">
+                <div className="row">
+                  <div className="arrow-button col-1">
+                    <i
+                      className="fas fa-arrow-circle-left"
+                      onClick={this.leftClick}
+                    />
+                  </div>
+                  <div className="col-10">
+                    <Slider
+                      source={this.state.rockets[this.state.current]}
+                    />
+                  </div>
+                  <div className="arrow-button col-1">
+                    <i
+                      className="fas fa-arrow-circle-right"
+                      onClick={this.rightClick}
+                    />
+                  </div>
                 </div>
-                <div className="col-5">
-                    <div className="row">
-                    <div className="col-12">
-                                <Chart description={this.state.stats[this.state.current]}></Chart>
-                    </div>
-                    <div className="col-12" onClick={this.redirect}>
-                        <GoButton />
-                    </div>
-                    </div>
+              </div>
+              <div className="col-5">
+                <div className="row">
+                  <div className="col-12">
+                    <Chart
+                      description={this.state.stats[this.state.current]}
+                    />
+                  </div>
+                  <div className="col-12" onClick={this.redirect}>
+                    <GoButton />
+                  </div>
                 </div>
-                </div>
+              </div>
             </div>
-        )
+          </div>
+        );
     }
 }
 

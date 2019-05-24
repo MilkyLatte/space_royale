@@ -1,5 +1,5 @@
 import React from 'react';
-import "./Lobby.css"
+import "./style/Lobby.css"
 
 
 function GoButton(props) {
