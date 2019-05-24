@@ -32,6 +32,10 @@ class Login extends React.Component {
         var googleId = profile.getId()
         var googleName = profile.getName();
         var googleEmail = profile.getEmail();
+
+        console.log(googleId);
+        console.log(googleName);
+        console.log(googleEmail);
         
         //anything else you want to do(save to localStorage)...
 
