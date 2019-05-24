@@ -1,6 +1,5 @@
 import React from "react";
 import "../App.css";
-import background from "./map.png";
 import { Vector2 } from "three";
 import io from "socket.io-client";
 import * as sizeof from "object-sizeof";
@@ -46,7 +45,7 @@ class Game extends React.Component {
     this.mouse = new Vector2(50, 100);
     this.change = false;
     this.playerNumber = 0;
-    this.socket = io.connect("http://192.168.0.46:5000/");
+    this.socket = io.connect("http://localhost:5000/");
     this.gameId = 0;
     this.gameOver = false;
   }
@@ -459,10 +458,6 @@ class Game extends React.Component {
   };
 
   componentDidMount() {
-    let bg = new Image();
-    bg.onload = this.loadMap(bg);
-    bg.src = background;
-
     this.loadBackground();
     this.loadShips();
     this.loadUIElements();
