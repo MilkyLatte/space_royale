@@ -43,27 +43,27 @@ class Login extends React.Component{
         var googleName = profile.getName();
         var googleEmail = profile.getEmail();
 
-        axios.post('/loginUser', {
-            username: "test", password: "danwoo1004"
-        }).then(response => {
-            console.log("Logged in");
-        }).catch(err => {
-            if (err.response.data === 'bad username' || err.response.data === 'passwords do not match') {
-                console.log(err.response.data);
-            }
-        })
-        
-        // axios.post('/registerGoogleUser', {
-        //     id: googleId, username: googleName, email: googleEmail
-        // }).then (response => {
-        //     // this.setRedirect()
-        // })
-
-        // axios.post('/registerUser', {
-        //     username: googleName, password: "1234", email: googleEmail
+        // axios.post('/loginUser', {
+        //     username: "test", password: "danwoo1004"
         // }).then(response => {
-        //     console.log(response.data.message);
+        //     console.log("Logged in");
+        // }).catch(err => {
+        //     if (err.response.data === 'bad username' || err.response.data === 'passwords do not match') {
+        //         console.log(err.response.data);
+        //     }
         // })
+        
+        axios.post('/registerGoogleUser', {
+            id: googleId, username: googleName, email: googleEmail
+        }).then (response => {
+            this.setRedirect()
+        })
+
+        axios.post('/registerUser', {
+            username: googleName, password: "1234", email: googleEmail
+        }).then(response => {
+            console.log(response.data.message);
+        })
 
 
     }
