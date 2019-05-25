@@ -7,9 +7,13 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const color = require('colors');
 const sizeof = require("object-sizeof");
-const bcrypt = require('bcrypt');
+const passport = require('passport');
+const localstrategy = require('passport-local');
+const Cors = require('cors');
+const logger = require('morgan');
 
-const saltRounds = 10;
+const Config = require('./config/passport');
+
 
 var ships = {};
 var hpBars = {};
@@ -20,10 +24,19 @@ var background = {}
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.set('view engine', 'ejs');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(Cors());
+app.use(logger('dev'));
+app.use(passport.initialize());
+
+require("./routes/loginUser")(app);
+require("./routes/registerUser")(app);
+require("./routes/registerGoogleUser")(app);
+// require("./routes/findUser")(app);
+// require("./routes/deleteUser")(app);
+// require("./routes/updateUser")(app);
 
 
 app.get('/api/hello', (req, res) => {
@@ -112,19 +125,18 @@ app.get('/api/background', (req, res) => {
     });
 })
 
-app.post('/api/googleRegister', (req, res) => {
-    const { id, username, email } = req.body;
+// app.post('/api/googleRegister', (req, res) => {
+//     const { id, username, email } = req.body;
     
-    hashPassword(username).done((hashedUserName) => {
-        hashPassword(email).done((hashedemail) => {
-            insertGoogleUser(id, hashedUserName, hashedemail).done((success) => {
-                res.send(success);
-            });
-            // res.send({id: hashedId, name: hashedName, email: hashedemail});
-        });
-    });
-})
-
+//     hashPassword(username).done((hashedUserName) => {
+//         hashPassword(email).done((hashedemail) => {
+//             insertGoogleUser(id, hashedUserName, hashedemail).done((success) => {
+//                 res.send(success);
+//             });
+//             // res.send({id: hashedId, name: hashedName, email: hashedemail});
+//         });
+//     });
+// })
 
 ////////////////////////////////////////////////////
 
@@ -184,77 +196,77 @@ db.close((err) => {
 ///////////////////////////////////////////////////
 
 // Check if user is already in database //////////
-function checkExist(id, db, table) {
+// function checkExist(id, db, table) {
     
-    let googleTable = 'SELECT EXISTS(SELECT 1 FROM ' + table + ' WHERE id =' + id + ')';
-    let check = 'EXISTS(SELECT 1 FROM Google_User WHERE id =' + id + ')';
+//     let googleTable = 'SELECT EXISTS(SELECT 1 FROM ' + table + ' WHERE id =' + id + ')';
+//     let check = 'EXISTS(SELECT 1 FROM Google_User WHERE id =' + id + ')';
     
-    return new Promise((fulfill, reject) => {
-        db.serialize( function() {
-            db.each(googleTable, (err, row) => {
-                if (err) {
-                    console.error(err.message);
-                    reject(err);
-                };
-                console.log(row);
-                if (row[check] == 1) {
-                    fulfill({exist:true});
-                } else {
-                    fulfill({exist: false});
-                }
-            });
-        });
-    });    
-}
+//     return new Promise((fulfill, reject) => {
+//         db.serialize( function() {
+//             db.each(googleTable, (err, row) => {
+//                 if (err) {
+//                     console.error(err.message);
+//                     reject(err);
+//                 };
+//                 console.log(row);
+//                 if (row[check] == 1) {
+//                     fulfill({exist:true});
+//                 } else {
+//                     fulfill({exist: false});
+//                 }
+//             });
+//         });
+//     });    
+// }
     
 
-// Insert user to database ///////////////////////
-function insertGoogleUser(id, username, email) {
-    // Database connection
-    return new Promise((fulfill, reject) => {
+// // Insert user to database ///////////////////////
+// function insertGoogleUser(id, username, email) {
+//     // Database connection
+//     return new Promise((fulfill, reject) => {
         
-        let db = new sqlite3.Database('./Database/game_database', (err) => {
-            if (err) {
-                console.error(err.message);
-                reject(err);
-            };
+//         let db = new sqlite3.Database('./Database/game_database', (err) => {
+//             if (err) {
+//                 console.error(err.message);
+//                 reject(err);
+//             };
         
-            console.log('Connected to the google login database'.blue);
-        });
+//             console.log('Connected to the google login database'.blue);
+//         });
     
-        checkExist(id, db, 'Google_User')
-            .then(res => {
-                if (res.exist == true) {
-                    fulfill({exist: true, inserted: false});
-                }
-                else {
-                    console.log("Here");
-                    db.run('INSERT INTO Google_User VALUES(?, ?, ?)', [id, username, email], (err) => {
-                        if (err) {
-                            console.error(err.message);
-                            reject(err);
-                        }
-                        console.log("Added new user to google database".blue);
-                        fulfill({exist: false, inserted: true});
-                    })
-                    db.close((err) => {
-                        if (err) {
-                            console.error(err.message);
-                            reject(err);
-                        };
+//         checkExist(id, db, 'Google_User')
+//             .then(res => {
+//                 if (res.exist == true) {
+//                     fulfill({exist: true, inserted: false});
+//                 }
+//                 else {
+//                     console.log("Here");
+//                     db.run('INSERT INTO Google_User VALUES(?, ?, ?)', [id, username, email], (err) => {
+//                         if (err) {
+//                             console.error(err.message);
+//                             reject(err);
+//                         }
+//                         console.log("Added new user to google database".blue);
+//                         fulfill({exist: false, inserted: true});
+//                     })
+//                     db.close((err) => {
+//                         if (err) {
+//                             console.error(err.message);
+//                             reject(err);
+//                         };
                 
-                        console.log('Closed google database'.blue);
-                    }); 
-                }
-            })
-            .catch((err) => {
-                console.error(err.message);
-                reject(err);
-            })
+//                         console.log('Closed google database'.blue);
+//                     }); 
+//                 }
+//             })
+//             .catch((err) => {
+//                 console.error(err.message);
+//                 reject(err);
+//             })
 
-    });
+//     });
 
-};
+// };
 /////////////////////////////////////////////
 
 // Game Logic

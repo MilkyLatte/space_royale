@@ -1,0 +1,140 @@
+const jwtSecret = require('./jwtConfig');
+const bcrypt = require('bcrypt');
+
+const saltRounds = 12;
+
+const passport = require('passport');
+const localStrategy = require('passport-local').Strategy;
+const User = require('../sequelize/sequelize');
+const googleUser = require('../sequelize/googleSequelize');
+const JWTstrategy = require('passport-jwt').Strategy;
+const ExtractJWT = require('passport-jwt').ExtractJwt;
+
+passport.use(
+    'register',
+    new localStrategy(
+        {
+            usernameField: 'username',
+            passwordField: 'password',
+            session: false,
+        },
+        (username, userpassword, done) => {
+            try {
+                User.findOne({
+                    where: {
+                        username: username,
+                    },
+                }).then(user => {
+                    if (user != null) {
+                        console.log('username already taken');
+                        return done(null, false, {message: 'username already taken'});
+                    } else {
+                        bcrypt.hash(userpassword, saltRounds).then(hashedPassword => {
+                            User.create({username, password: hashedPassword}).then(user => {
+                                console.log("user created");
+                                return done(null, user);
+                            })
+                        })
+                    }
+                })
+            } catch (err) {
+                done(err);
+            }
+        } 
+    )
+);
+
+passport.use(
+    'Googleregister',
+    new localStrategy (
+        {
+            usernameField: 'id',
+            passwordField: 'username',
+            session: false,
+        },
+        (username, password, done) => {
+            try {
+                googleUser.findOne({
+                    where: {
+                        id: username,
+                    }
+                }).then(user => {
+                    if (user != null) {
+                        console.log('existing user');
+                        return done(null, false, {message: 'user exists'});
+                    } else {
+                        googleUser.create({id: username, username: password}).then(user => {
+                            console.log("User created");
+                            return done(null, user);
+                        })
+                    }
+                })
+            } catch (err) {
+                done(err);
+            }
+        }
+    )
+)
+
+passport.use(
+    'login',
+    new localStrategy(
+        {
+            usernameField: 'username',
+            passwordField: 'password',
+            session: false,
+        },
+        (username, password, done) => {
+            try {
+                User.findOne({
+                    where: {
+                        username: username,
+                    },
+                }).then(user => {
+                    if (user == null) {
+                        return done(null, false, {message: 'bad username'});
+                    } else {
+                        bcrypt.compare(password, user.password).then(response => {
+                            if (response != true) {
+                                console.log("passwords do not match");
+                                return done(null, false, {message: "passwords do not match"});
+                            }
+                            console.log('user found & authenticated');
+                            return done(null, user);
+                        });
+                    }
+                });
+            } catch (err) {
+                done(err);
+            }
+        }
+    )
+);
+
+const opts = {
+    jwtFromRequest: ExtractJWT.fromAuthHeaderWithScheme('JWT'),
+    secretOrKey: jwtSecret.secret,
+};
+
+passport.use(
+    'jwt',
+    new JWTstrategy(opts, (jwt_payload, done) => {
+        try {
+            User.findOne({
+                where: {
+                    username: jwt_payload.id,
+                },
+            }).then(user => {
+                if (user) {
+                    console.log('user found in db in passport');
+                    done(null, user);
+                } else {
+                    console.log('user not found in db');
+                    done(null, false);
+                }
+            });
+        } catch (err) {
+            done(err);
+        }
+    })
+);

@@ -1,8 +1,78 @@
 import "./style/Login.css"
 import React from "react"
+import io from "socket.io-client"
+import { Redirect } from 'react-router-dom'
+import axios from "axios"
+
+const GOOGLE_BUTTON_ID = 'google-sign-in-button';
 
 class Login extends React.Component{
+    
+    state = {
+        loginRedirect: false
+    }
 
+    setRedirect = () => {
+        this.setState({
+            loginRedirect: true
+        })
+    }
+
+    noresponseGoogle = (response) => {
+        console.log(response);
+        this.socket = io.connect("http://localhost:5000")
+    }
+    
+    componentDidMount() {
+        window.gapi.signin2.render(
+            GOOGLE_BUTTON_ID, {
+                width: 135,
+                height: 45,
+                onsuccess: this.responseGoogle,
+                onfailure: this.noresponseGoogle
+            }
+        )
+    }
+
+    responseGoogle = (googleUser) => {
+
+        var id_token = googleUser.getAuthResponse().id_token;
+        var profile = googleUser.getBasicProfile();
+
+        var googleId = profile.getId()
+        var googleName = profile.getName();
+        var googleEmail = profile.getEmail();
+
+        axios.post('/loginUser', {
+            username: "test", password: "danwoo1004"
+        }).then(response => {
+            console.log("Logged in");
+        }).catch(err => {
+            if (err.response.data === 'bad username' || err.response.data === 'passwords do not match') {
+                console.log(err.response.data);
+            }
+        })
+        
+        // axios.post('/registerGoogleUser', {
+        //     id: googleId, username: googleName, email: googleEmail
+        // }).then (response => {
+        //     // this.setRedirect()
+        // })
+
+        // axios.post('/registerUser', {
+        //     username: googleName, password: "1234", email: googleEmail
+        // }).then(response => {
+        //     console.log(response.data.message);
+        // })
+
+
+    }
+
+    renderRedirect = () => {
+        if (this.state.loginRedirect) {
+            return <Redirect to='/lobby' />
+        }
+    }
 
     render() {
         return (
@@ -46,7 +116,9 @@ class Login extends React.Component{
                                         or
                                     </div>
                                     <div className="col-lg-5">
-                                        <div className="g-signin2" id="g-button" data-onsuccess="onSignIn" data-height="45" data-width="135%"></div>
+                                        {this.renderRedirect()}
+                                        <div id={GOOGLE_BUTTON_ID}></div>             
+
                                     </div>
                                 </div>
 
