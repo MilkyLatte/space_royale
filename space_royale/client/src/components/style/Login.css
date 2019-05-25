@@ -74,10 +74,11 @@
     text-align: center;
     padding-top: 5px;
     font-size: 1.5rem;
-    margin-top: 10px;
+    margin-top: 20px;
     -webkit-box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
     -moz-box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
     box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
+    border-style: none;
 }
 
 .login-button:hover{
@@ -102,7 +103,8 @@
 
 #or{
     padding: 0;
-    margin-top: 20px;
+    margin-top: 30px;
     padding-left: 10px;
     height: 10px;
 }
+
