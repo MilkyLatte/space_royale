@@ -6,8 +6,7 @@ import Lobby from './components/Lobby';
 import Home from './components/Home'
 import Navbar from './components/Navbar';
 import Login from './components/Login';
-import signUp from './components/signUp'
-
+import Register from './components/Register';
 
 class App extends React.Component{
   state = {
@@ -31,7 +30,7 @@ class App extends React.Component{
               <Route path="/game" component={Game} />
               <Route path="/lobby" component={Lobby} />
               <Route path="/home" component={Home} />
-              <Route path="/signup" component={signUp} />
+              <Route path="/register" component={Register} />
           </Switch>
         </BrowserRouter>
       </div>

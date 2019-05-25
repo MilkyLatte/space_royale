@@ -1,0 +1,39 @@
+.register-main-container {
+    height: 70%;
+    width: 50%;
+    max-width: 600px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+    -webkit-box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    -moz-box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    background-color: rgb(248, 248, 248);
+
+}
+
+.inner-container {
+    padding-left: 20%;
+    padding-right: 20%;
+    padding-top: 10%;
+}
+
+
+.submitButtonRegister {
+    width: 100%;
+    border-radius: 5px;
+    width: 100%;
+    background-color: #40cfff;
+    height: 3rem;
+    color: white;
+    text-align: center;
+    padding-top: 5px;
+    font-size: 1.5rem;
+    margin-top: 10px;
+    border-style: none;
+    -webkit-box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
+    -moz-box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
+    box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
+}
