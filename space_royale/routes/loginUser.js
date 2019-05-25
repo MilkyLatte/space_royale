@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 
 module.exports = app => {
-    app.get('/loginUser', (req, res, next) => {
+    app.post('/loginUser', (req, res, next) => {
         passport.authenticate('login', (err, user, info) => {
             if (err) {
                 console.log(err);

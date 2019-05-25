@@ -1,12 +1,27 @@
 import React from 'react';
 import "./style/Register.css"
+import axios from "axios";
+import {Redirect} from "react-router-dom"
 
 class Register extends React.Component{
     state = {
         password: '',
         confirmPassword: '',
         email: '',
-        username: ''
+        username: '',
+        loginRedirect: false
+    }
+
+    setRedirect = () => {
+        this.setState({
+            loginRedirect: true
+        })
+    }
+
+    renderRedirect = () => {
+        if (this.state.loginRedirect) {
+            return <Redirect to ='/login' />
+        }
     }
 
     passwordHandle = e => {
@@ -27,7 +42,17 @@ class Register extends React.Component{
 
     handleSubmit = e => {
         e.preventDefault();
-        console.log(this.state);
+        if (this.state.password === this.state.confirmPassword) {
+            axios.post('/registerUser', {
+                username: this.state.username, password: this.state.confirmPassword, email: this.state.email
+            }).then(response => {
+                if (response.data.message == undefined) {
+                    console.log("Username is occupied. Try it again");
+                } else {
+                    this.setRedirect();
+                }
+            })
+        }
 
     }
     render() {
@@ -54,7 +79,7 @@ class Register extends React.Component{
                             <label htmlFor="reg-confirm" className="labels">Confirm password:</label>
                             <input type="password" className="form-control form-control-lg" id="reg-confirm" value={this.state.confirmPassword} onChange={this.confirmHandle} required/>
                         </div>
-
+                        {this.renderRedirect()}
                         <button className="submitButtonRegister">Register!</button>
 
                     </form>

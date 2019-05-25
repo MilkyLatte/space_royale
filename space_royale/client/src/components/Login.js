@@ -1,14 +1,29 @@
 import "./style/Login.css"
 import React from "react"
+import axios from "axios";
+import {Redirect} from "react-router-dom"
 
 class Login extends React.Component {
   state = {
-    email: "",
-    password: ""
+    username: "",
+    password: "",
+    lobbyRedirect: false
   };
 
-  emailHandle = e => {
-    this.setState({ email: e.target.value });
+  setRedirect = () => {
+    this.setState({
+        lobbyRedirect: true
+    })
+  }
+
+  renderRedirect = () => {
+    if(this.state.lobbyRedirect) {
+        return <Redirect to = '/lobby' />
+    }
+  }
+
+  usernameHandle = e => {
+    this.setState({ username: e.target.value });
   };
 
   passwordHandle = e => {
@@ -17,8 +32,18 @@ class Login extends React.Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    console.log(this.state);
-  };
+    axios.post('/loginUser', {
+        username: this.state.username,
+        password: this.state.password
+    }).then((response) => {
+        console.log("successfully logged in");
+        localStorage.setItem('JWT', response.data.token);
+        this.setRedirect();
+    }).catch((error) => {
+          console.error(error.response.data);
+        });
+    }
+
 
   render() {
     return (
@@ -37,15 +62,15 @@ class Login extends React.Component {
                 <h2>Sign in</h2>
                 <form onSubmit={this.handleSubmit}>
                   <div className="form-group">
-                    <label htmlFor="email" className="labels">
-                      Your Email:
+                    <label htmlFor="username" className="labels">
+                      Your Username:
                     </label>
                     <input
-                      type="email"
+                      type="text"
                       className="form-control form-control-lg"
-                      id="email"
-                      value={this.state.email}
-                      onChange={this.emailHandle}
+                      id="username"
+                      value={this.state.username}
+                      onChange={this.usernameHandle}
                       required
                     />
                   </div>
@@ -64,6 +89,7 @@ class Login extends React.Component {
                   </div>
                   <div className="row">
                     <div className="col-lg-6">
+                      {this.renderRedirect()}
                       <button className="login-button">Sign In</button>
                     </div>
                     <div className="col-1" id="or">
