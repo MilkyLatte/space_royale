@@ -24,7 +24,6 @@ class App extends React.Component{
       <div>
         <BrowserRouter>
           {this.navFunction()}
-          {/* <span> .</span> */}
           <Switch>
               <Route path="/login" component={Login}></Route>
               <Route path="/game" component={Game} />
@@ -33,6 +32,8 @@ class App extends React.Component{
               <Route path="/register" component={Register} />
           </Switch>
         </BrowserRouter>
+
+        <h3 className="author-message">Brought to you by Juan Quintero and David Shin</h3>
       </div>
     );
   }

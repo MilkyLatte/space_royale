@@ -3,3 +3,12 @@ background-color: #2f4353;
 background-image: linear-gradient(315deg, #2f4353 0%, #d2ccc4 74%);
 background: -webkit-gradient(linear, left top, right top, color-stop(0%,#87e0fd), color-stop(40%,#378ba5), color-stop(100%,#036d91));
 }
+
+.author-message {
+    position: absolute;
+    width: 20%;
+    top: 95%;
+    left: 80%;
+    font-size: 15px;
+    color: white;
+}

@@ -1,9 +1,12 @@
 import React from "react";
 import "./style/Game.css";
+import { Link } from 'react-router-dom';
 
 import { Vector2 } from "three";
 import io from "socket.io-client";
 import * as sizeof from "object-sizeof";
+import { Redirect } from 'react-router-dom'
+
 
 class Ship {
   constructor(width, height, img) {
@@ -50,9 +53,13 @@ class Game extends React.Component {
     this.gameId = 0;
     this.gameOver = false;
     this.unmounted = false;
+    this.choice = 0;
   }
 
   state = {
+    redirect: false,
+    gameOver: false,
+    winner: false,
     renderResponse: ""
   };
 
@@ -339,6 +346,10 @@ class Game extends React.Component {
     }
   };
 
+  mainUpdateLoop = setInterval(() => {
+    this.update();
+  }, 1000 / 100);
+
   fire = e => {
     if (e.code === "Space") {
       this.socket.emit("fire", { player: this.playerNumber });
@@ -408,6 +419,9 @@ class Game extends React.Component {
   dead = data => {
     console.log("FINISHED");
     this.gameOver = true;
+    this.socket.disconnect();
+    clearInterval(this.mainUpdateLoop);
+    this.setState({gameOver: true, winner: data.winner})
   };
 
   initGame = data => {
@@ -422,9 +436,7 @@ class Game extends React.Component {
     this.socket.on("update", this.updateGame);
     this.socket.on("gameover", this.dead);
     document.addEventListener("keydown", this.fire, false);
-    setInterval(() => {
-      this.update();
-    }, 1000 / 100);
+
   };
 
   loadShips = () => {
@@ -492,21 +504,27 @@ class Game extends React.Component {
   };
 
   componentDidMount() {
-    this.loadBackground();
-    this.loadShips();
-    this.loadUIElements();
-
-    fetch("api/hello")
-      .then(res => res.json())
-      .then(data => this.setState({ renderResponse: data }))
-      .catch(err => console.log(err));
-    let loading = setInterval(() => {
-      this.drawLoading();
-      if (this.playing) clearInterval(loading);
-    }, 1000/100)
-    this.socket.emit("choice", { type: this.props.location.state.choice });
-    this.socket.on("init", this.initGame);
-    this.socket.on("play", this.play);
+    if (!this.props.location.state){
+      this.setState({ redirect: true })
+    } else {
+      this.choice = this.props.location.state.choice;
+      this.loadBackground();
+      this.loadShips();
+      this.loadUIElements();
+  
+      fetch("api/hello")
+        .then(res => res.json())
+        .then(data => this.setState({ renderResponse: data }))
+        .catch(err => console.log(err));
+      let loading = setInterval(() => {
+        this.drawLoading();
+        if (this.playing) clearInterval(loading);
+      }, 1000/100)
+      this.socket.emit("choice", { type: this.props.location.state.choice });
+      this.socket.on("init", this.initGame);
+      this.socket.on("play", this.play);
+    }
+    
   }
 
   componentWillUnmount() {
@@ -514,10 +532,46 @@ class Game extends React.Component {
     this.socket.disconnect();
     document.removeEventListener("keydown", this.fire, false);
   }
+  gameOverButtons() {
+    let gameOverMessage;
+
+    if (this.state.gameOver && this.state.winner) {
+      gameOverMessage = <h2 id="victory">VICTORY</h2>;
+    } else {
+      gameOverMessage = <h2 id="defeat">DEFEAT</h2>;
+    }
+
+    if (this.state.gameOver) {
+      return (
+        <div className="gameover-container">
+
+          <div className="row">
+            <div className="col-12" id="top-row">
+              <div className="GameOver">{gameOverMessage}</div>
+            </div>
+            <div className="col-lg-12">
+              <Link  to="/lobby">
+                <button id="home-button">
+                  <i className="fas fa-home"></i>
+                </button>
+              </Link>
+            </div>
+          </div>
+
+        </div>
+
+      )
+    }
+  }
+
 
   render() {
+    if (this.state.redirect) {
+      return <Redirect  to= '/lobby'/>
+    }
     return (
         <div id="gameContainer" className="container">
+        {this.gameOverButtons()}
           <canvas className="gameCanvas"
             ref="canvas"
             width={this.game_data.canvas.width}
@@ -534,3 +588,4 @@ class Game extends React.Component {
 }
 
 export default Game;
+        

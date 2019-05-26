@@ -441,6 +441,7 @@ class Game {
         this.players = [];
         this.size = new THREE.Vector3(2000, 2000);
         this.sockets = [];
+        this.alivePlayers = playerCount;
     }
 
     join(id, type) {
@@ -647,7 +648,6 @@ io.on('connection', function(socket){
         master.games[GAMEID].ready += 1;
         connected = true;
     })
-    console.log(`ID: ${GAMEID}`)
     console.log('made socket connection', socket.id);
 
     socket.on('state', function(data){
@@ -665,21 +665,6 @@ io.on('connection', function(socket){
         let now = (new Date).getTime();
         if (now - lastBullet > master.games[GAMEID].players[playerID].bulletCooldown){
             master.games[GAMEID].players[playerID].shoot();
-            // let p1 = master.games[GAMEID].players[playerID].pos.clone();
-            // let p2 = master.games[GAMEID].players[playerID].pos.clone();
-    
-            // let v = master.games[GAMEID].players[playerID].velocity.clone();
-            // let angle = master.games[GAMEID].players[playerID].angle;
-    
-            // p1.x += 25 * Math.cos(angle) + 25 * Math.sin(angle);
-            // p1.y +=  - 25 * Math.cos(angle) +  25 * Math.sin(angle);
-            // let bullet = new Bullet(
-            //   p1,
-            //   v,
-            //   angle,
-            //   playerID
-            // );
-            // master.games[GAMEID].players[playerID].bullets.push(bullet);
             lastBullet = now;
         }
     })
@@ -691,7 +676,6 @@ io.on('connection', function(socket){
             if (master.games[GAMEID].playing){
                 socket.emit("play", {playersInfo: master.games[GAMEID].players})
                 playing = true;
-                console.log("INTERVAAAAL");
                 clearInterval(interval);
             }
         }
@@ -700,11 +684,16 @@ io.on('connection', function(socket){
     let mainLoop = setInterval(updater, 1000/100)
     function updater(){
         if (playing) {
-            // console.log("HERE");
-
-            if (master.games[GAMEID].players[playerID].dead){
-                socket.emit("gameover", {gameOver: true});
+            if (
+              master.games[GAMEID].alivePlayers == 1 &&
+              !master.games[GAMEID].players[playerID].dead
+            ) {
+                socket.emit("gameover", {gameOver: true, winner: true});
             }
+            if (master.games[GAMEID].players[playerID].dead) {
+                socket.emit("gameover", { gameOver: true, winner: false});
+            }
+
             let players = []
             master.games[GAMEID].players.forEach(player => {
                 players.push(player.getPackedData());
@@ -713,6 +702,7 @@ io.on('connection', function(socket){
               playersInfo: players,
             });
             if (socket.disconnected) {
+                master.games[GAMEID].alivePlayers -= 1;
                 master.games[GAMEID].disconnected += 1;
                 socket.disconnect();
                 console.log("DISCONNECTED");

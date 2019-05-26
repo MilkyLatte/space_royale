@@ -6,8 +6,64 @@
   top: 60%;
   left: 50%;
   transform: translate(-50%, -50%);
+
 }
 
 #gameContainer {
   margin-top: 100px;
+}
+
+.gameover-container{
+  width: 30%;
+  height: 30%;
+  /* background-color: rgba(236, 236, 255, 0.267); */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-60%, -50%);
+  border-radius: 20px;
+}
+
+.GameOver {
+  /* margin-top: 20px; */
+  text-align: center;
+  padding-left: 10%;
+}
+
+#victory {
+  color: chartreuse;
+  font-size: 6rem;
+  text-shadow: 4px 3px 0 #7A7A7A;
+}
+
+#defeat {
+  color: red;
+  font-size: 6rem; 
+  text-shadow: 4px 3px 0 #7A7A7A;
+}
+
+#top-row{
+  /* height: 20%; */
+  padding-top: 10px;
+}
+
+#home-button {
+    margin-left: 20%;
+    font-size: 3rem;
+    color: white;
+    background-color: #40cfff;
+    border-style: none;
+    border-radius: 5px;
+    width: 70%;
+
+  }
+
+#play-again {
+    margin-left: 20%;
+    font-size: 3rem;
+    color: white;
+    background-color: rgb(0, 189, 0);
+    border-style: none;
+    border-radius: 5px;
+    width: 70%;
 }
