@@ -1,4 +1,3 @@
-
  .navbar {
   min-height: 80px;
 }
@@ -8,6 +7,7 @@
   height: 80px;
   line-height: 80px;
   font-size: 3rem;
+  text-shadow: 3px 1px 2px rgba(150, 150, 150, 1);
 }
 
 .navbar-toggle {
@@ -17,4 +17,5 @@
 
 .nav-link {
     font-size: 2rem;
+
 }

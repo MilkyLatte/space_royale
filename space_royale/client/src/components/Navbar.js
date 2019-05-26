@@ -40,12 +40,12 @@ class Navbar extends React.Component{
             >
               <ul className="navbar-nav  ml-auto">
                 <li className="nav-item active">
-                  <Link className="nav-link" to="#">
-                    Home <span className="sr-only">(current)</span>
+                  <Link className="nav-link" to="/lobby">
+                    Home 
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="#">
+                  <Link className="nav-link" to="/leaderboards">
                     Leaderboards
                   </Link>
                 </li>

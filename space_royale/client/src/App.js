@@ -20,18 +20,11 @@ class App extends React.Component{
       // this.setState({loggedIn: true })
     }
   }
-
-  navFunction = () => {
-    if (localStorage.getItem("JWT")) {
-      return <Navbar></Navbar>
-    }
-  }
   render(){
 
     return (
-      <div>
+      <div className="app-main">
         <BrowserRouter>
-          {/* {this.navFunction()} */}
           <span id="dot">.</span>
           <Switch>
               <Route path='/login' component={Login} />

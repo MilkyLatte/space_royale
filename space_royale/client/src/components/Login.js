@@ -37,10 +37,8 @@ class Login extends React.Component {
             id: googleId,
             username: googleName
         }).then((loginResponse) => {
-            console.log(loginResponse.data);
             if(loginResponse.data !== 'bad id') {
               console.log("successfully logged in");
-
               localStorage.setItem('JWT', loginResponse.data.token);
               this.setRedirect();
               // this.renderRedirect();
@@ -108,69 +106,71 @@ class Login extends React.Component {
     
     return (
       <div className="container">
-      <div className="main-container">
-        <div className="row">
-          <div className="col-6">
-            <div className="login-image" />
-          </div>
-          <div className="col-6">
-            <div className="right-login">
-              <div className="container login-container">
-                <div className="headline">
-                  <h2 className="fas fa-rocket top-part" />
-                  <h2 className="top-part">SPACE ROYALE</h2>
-                </div>
-                <h2>Sign in</h2>
-                <form onSubmit={this.handleSubmit}>
-                  <div className="form-group">
-                    <label htmlFor="username" className="labels">
-                      Your Username:
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control form-control-lg"
-                      id="username"
-                      value={this.state.username}
-                      onChange={this.usernameHandle}
-                      required
-                    />
+        <div className="main-container">
+          <div className="row row-login">
+            <div className="col-6">
+              <div className="login-image" />
+            </div>
+            <div className="col-6">
+              <div className="right-login">
+                <div className="container login-container">
+                  <div className="headline">
+                    <h2 className="fas fa-rocket top-part" />
+                    <h2 className="top-part">SPACE ROYALE</h2>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="password" className="labels">
-                      Your Password:
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control form-control-lg"
-                      id="password"
-                      value={this.state.password}
-                      onChange={this.passwordHandle}
-                      required
-                    />
-                  </div>
-                  <div className="row">
-                    <div className="col-lg-6">
+                  <h2>Sign in</h2>
+                  <form onSubmit={this.handleSubmit}>
+                    <div className="form-group">
+                      <label htmlFor="username" className="labels">
+                        Your Username:
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control form-control-lg"
+                        id="username"
+                        value={this.state.username}
+                        onChange={this.usernameHandle}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="password" className="labels">
+                        Your Password:
+                      </label>
+                      <input
+                        type="password"
+                        className="form-control form-control-lg"
+                        id="password"
+                        value={this.state.password}
+                        onChange={this.passwordHandle}
+                        required
+                      />
+                    </div>
+                    <div className="row row-login">
+                      <div className="col-lg-6 col-sm-12">
+                        {this.renderRedirect()}
+                        <button className="login-button">Sign In</button>
+                      </div>
+                      <div className="col-lg-1 col-sm-12" id="or">
+                        <span>or</span>
+                      </div>
                       {this.renderRedirect()}
-                      <button className="login-button">Sign In</button>
+                      <div className="col-lg-5 col-sm-12" id="g-button">
+                        <div id={GOOGLE_BUTTON_ID} />
                       </div>
-                      <div className="col-1" id="or">
-                      or
-                      </div>
-                    {this.renderRedirect()}
-                    <div id={GOOGLE_BUTTON_ID}></div>
-                  </div>
-                </form>
-              </div>
-                <div className="col-12" id="register-here">
-                  <h4>Need an account? Register <Link to="/register">here</Link></h4>
+                    </div>
+                  </form>
                 </div>
+                <div className="col-12" id="register-here">
+                  <h4>
+                    Need an account? Register <span> </span>
+                    <Link to="/register">here</Link>
+                  </h4>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      
-      
       </div>
     );
   }
