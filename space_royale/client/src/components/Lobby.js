@@ -5,6 +5,8 @@ import Chart from "./Chart";
 import GoButton from "./GoButton";
 import { Redirect } from 'react-router-dom'
 import { withRouter } from 'react-router'
+import Navbar from "./Navbar";
+
 
 
 class ShipStats {
@@ -86,6 +88,8 @@ class Lobby extends React.Component {
             }}/>
         }
         return (
+          <div>
+            <Navbar></Navbar>
           <div className="container">
             <div className="row" id="main-row">
               <div className="col-7">
@@ -122,6 +126,10 @@ class Lobby extends React.Component {
                 </div>
               </div>
             </div>
+          </div>
+
+
+
           </div>
         );
     }

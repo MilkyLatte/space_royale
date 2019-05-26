@@ -1,10 +1,22 @@
 import React from 'react';
 import "./style/Navbar.css";
-import {Link} from "react-router-dom";
+import {Link, Redirect} from "react-router-dom";
 
 
 class Navbar extends React.Component{
+    state = {
+      loggedOut: false
+    }
+    logout = () => {
+      this.setState({loggedOut: true})
+      console.log(localStorage.removeItem('JWT'));
+    }
     render(){
+      if (this.state.loggedOut) {
+        return (
+          <Redirect to="/login"/>
+        )
+      }
         return (
           <nav className="navbar transparent navbar-expand-lg navbar-dark bg-transparent navbar-fixed-top">
             <Link className="navbar-brand" to="#">
@@ -58,9 +70,9 @@ class Navbar extends React.Component{
                     <Link className="dropdown-item" to="#">
                       Account Settings
                     </Link>
-                    <Link className="dropdown-item" to="#">
+                    <button className="dropdown-item" to="#" onClick={this.logout}> 
                       Logout
-                    </Link>
+                    </button>
                   </div>
                 </li>
               </ul>

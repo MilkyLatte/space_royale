@@ -43,9 +43,19 @@ class Login extends React.Component {
           console.error(error.response.data);
         });
     }
+    
+  componentDidMount() {
+    if (localStorage.getItem("JWT")) {
+      this.setRedirect()
+    }
+  }
 
 
   render() {
+    if(this.state.lobbyRedirect){
+      return (this.renderRedirect())
+    }
+    
     return (
       <div className="container">
       <div className="main-container">

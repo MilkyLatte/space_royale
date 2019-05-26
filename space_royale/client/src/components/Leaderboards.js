@@ -1,4 +1,5 @@
 import React from "react"
+import Navbar from "./Navbar";
 
 class Stat {
     constructor(player, wins, matches, kills){
@@ -20,12 +21,15 @@ class Leaderboards extends React.Component{
 
     render () {
         return(
-            <div className="container">
-                <div className="row">
+            <div>
+                <Navbar></Navbar>
+                <div className="container">
+                    <div className="row">
 
+
+                    </div>
 
                 </div>
-
             </div>
         )
     }
