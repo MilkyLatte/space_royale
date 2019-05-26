@@ -9,6 +9,8 @@ import Login from './components/Login';
 import Register from './components/Register';
 import { PrivateRoute } from './PrivateRoute';
 import Leaderboards from './components/Leaderboards';
+import withAuth from './withAuth';
+
 
 class App extends React.Component{
   state = {
@@ -28,11 +30,11 @@ class App extends React.Component{
           <span id="dot">.</span>
           <Switch>
               <Route path='/login' component={Login} />
-              <PrivateRoute path="/game" component={Game} />
-              <PrivateRoute path="/lobby" component={Lobby} />
-              <PrivateRoute path="/home" component={Home} />
+              <Route path="/game" component={withAuth(Game)} />
+              <Route path="/lobby" component={withAuth(Lobby)} />
+              <Route path="/home" component={withAuth(Home)} />
               <Route path="/register" component={Register} />
-              <PrivateRoute path="/leaderboards" component={Leaderboards} />
+              <Route path="/leaderboards" component={withAuth(Leaderboards)} />
           </Switch>
         </BrowserRouter>
 

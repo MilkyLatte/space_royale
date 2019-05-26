@@ -85,9 +85,6 @@ class Login extends React.Component {
     }
     
   componentDidMount() {
-    if (localStorage.getItem("JWT")) {
-      this.setRedirect()
-    }
     window.gapi.signin2.render(
       GOOGLE_BUTTON_ID, {
           width: 150,
@@ -96,6 +93,9 @@ class Login extends React.Component {
           onfailure: this.noresponseGoogle
       }
     )
+    if (localStorage.getItem("JWT")) {
+      this.setRedirect()
+    }
   }
 
 
