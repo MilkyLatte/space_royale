@@ -2,7 +2,7 @@ import React from "react"
 
 class Stat {
     constructor(player, wins, matches, kills){
-        this.player = players;
+        this.player = player;
         this.wins = wins;
         this.matches = matches;
         this.kills = kills;
@@ -10,7 +10,6 @@ class Stat {
 }
 
 class Leaderboards extends React.Component{
-
     state = {
         stats: []
     }
@@ -31,3 +30,5 @@ class Leaderboards extends React.Component{
         )
     }
 }
+
+export default Leaderboards;
