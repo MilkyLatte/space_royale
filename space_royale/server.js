@@ -12,7 +12,6 @@ const localstrategy = require('passport-local');
 const Cors = require('cors');
 const logger = require('morgan');
 const withAuth = require('./middleware');
-
 const Config = require('./config/passport');
 
 
@@ -51,15 +50,15 @@ app.post('/api/world', (req, res) => {
     );
 });
 
-function hashPassword(data){
+// function hashPassword(data){
 
-    return new Promise((fulfill, reject) => {
-        bcrypt.hash(data, saltRounds, (err, hashed) => {
-            if (err) reject(err)
-            else fulfill(hashed);
-        });
-    })
-}
+//     return new Promise((fulfill, reject) => {
+//         bcrypt.hash(data, saltRounds, (err, hashed) => {
+//             if (err) reject(err)
+//             else fulfill(hashed);
+//         });
+//     })
+// }
 
 function convertImage(imagePath) {
     return fs.readFileAsync(__dirname + imagePath, 'base64')

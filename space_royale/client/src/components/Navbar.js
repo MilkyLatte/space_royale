@@ -9,6 +9,11 @@ class Navbar extends React.Component{
     }
     logout = () => {
       this.setState({loggedOut: true})
+
+      auth2.signOut().then(function () {
+        console.log('User signed out.');
+      });
+
       console.log(localStorage.removeItem('JWT'));
     }
     render(){

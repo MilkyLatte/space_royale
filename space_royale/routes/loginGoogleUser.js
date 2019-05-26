@@ -20,7 +20,7 @@ module.exports = app => {
                             id: user.id,
                         },
                     }).then(user => {
-                        const token = jwt.sign({id: user.id}, jwtSecret.secret);
+                        const token = jwt.sign({id: user.id, database: "google"}, jwtSecret.secret);
                         res.status(200).send({
                             auth:true,
                             token: token,

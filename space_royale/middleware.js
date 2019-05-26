@@ -12,6 +12,7 @@ const withAuth = (req, res, next) => {
                 res.status(401).send('Unauthorized: Invalid token');
             } else {
                 req.id = decoded.id;
+                req.database = decoded.database;
                 next();
             }
         });
