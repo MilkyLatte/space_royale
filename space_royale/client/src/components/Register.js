@@ -5,6 +5,8 @@ import {Redirect} from "react-router-dom"
 
 class Register extends React.Component{
     state = {
+        userExists: false,
+        unmatched: false,
         password: '',
         confirmPassword: '',
         email: '',
@@ -40,6 +42,25 @@ class Register extends React.Component{
         this.setState({ email: e.target.value })
     }
 
+    passNoMatch = () => {
+        if(this.state.unmatched) {
+            setTimeout(() => {
+                this.setState({unmatched: false});
+            }, 5000);
+            return <h6 className="no-match">Passwords don't match</h6>
+        }
+    }
+
+    userNameExists = () => {
+        if(this.state.userExists) {
+            setTimeout(() => {
+                this.setState({ userExists: false });
+            }, 5000);
+            return <h6 className="no-match">Username already in use</h6>
+
+        }
+    }
+
     handleSubmit = e => {
         e.preventDefault();
         if (this.state.password === this.state.confirmPassword) {
@@ -47,11 +68,13 @@ class Register extends React.Component{
                 username: this.state.username, password: this.state.confirmPassword, email: this.state.email
             }).then(response => {
                 if (response.data.message == undefined) {
-                    console.log("Username is occupied. Try it again");
+                    this.setState({userExists: true});
                 } else {
                     this.setRedirect();
                 }
             })
+        } else {
+            this.setState({unmatched: true});
         }
 
     }
@@ -71,6 +94,7 @@ class Register extends React.Component{
                             <label htmlFor="reg-userName" className="labels">Username:</label>
                             <input type="text" className="form-control form-control-lg" id="reg-userName" name="username" value={this.state.username} onChange={this.userNameHandle}required/>
                         </div>
+                        {this.userNameExists()}
                         <div className="form-group">
                             <label htmlFor="reg-password" className="labels">Password:</label>
                             <input type="password" className="form-control form-control-lg" id="reg-password" value={this.state.password} onChange={this.passwordHandle} name="password" required/>
@@ -79,6 +103,7 @@ class Register extends React.Component{
                             <label htmlFor="reg-confirm" className="labels">Confirm password:</label>
                             <input type="password" className="form-control form-control-lg" id="reg-confirm" value={this.state.confirmPassword} onChange={this.confirmHandle} required/>
                         </div>
+                        {this.passNoMatch()}
                         {this.renderRedirect()}
                         <button className="submitButtonRegister">Register!</button>
 

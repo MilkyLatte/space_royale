@@ -37,3 +37,7 @@
     -moz-box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
     box-shadow: -14px 13px 29px -15px rgba(0,0,0,0.6);
 }
+
+.no-match {
+    color: red;
+}
