@@ -520,8 +520,9 @@ class Game extends React.Component {
       let loading = setInterval(() => {
         this.drawLoading();
         if (this.playing) clearInterval(loading);
+        console.log("HERE");
       }, 1000/100)
-      this.socket.emit("choice", { type: this.props.location.state.choice });
+      this.socket.emit("choice", { type: this.props.location.state.choice, token: localStorage.getItem('JWT') });
       this.socket.on("init", this.initGame);
       this.socket.on("play", this.play);
     }

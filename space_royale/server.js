@@ -631,8 +631,11 @@ io.on('connection', function(socket){
         win: false,
     };
 
+    let token;
+
 
     socket.on("choice", function(data){
+        token = data.token;
         let added = false;
         for (let i = 0; i < master.games.length; i++){
             if (master.games[i].players.length < master.games[i].capacity){
