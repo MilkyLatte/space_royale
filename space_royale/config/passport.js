@@ -111,6 +111,34 @@ passport.use(
     )
 );
 
+passport.use(
+    'googleLogin',
+    new localStrategy(
+        {
+            usernameField: 'id',
+            passwordField: 'username',
+            session: false,
+        },
+        (username, password, done) => {
+            try {
+                googleUser.findOne({
+                    where: {
+                        id: username,
+                    },
+                }).then(user => {
+                    if (user == null) {
+                        return done(null, false, {message: 'bad id'});
+                    } else {
+                        console.log('user found & authenticated');
+                        return done(null, user);
+                    }
+                });
+            } catch (err) {
+                done(err);
+            }
+        }
+    )
+)
 const opts = {
     jwtFromRequest: ExtractJWT.fromAuthHeaderWithScheme('JWT'),
     secretOrKey: jwtSecret.secret,

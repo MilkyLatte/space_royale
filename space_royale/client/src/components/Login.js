@@ -2,6 +2,7 @@ import "./style/Login.css"
 import React from "react"
 import axios from "axios";
 import {Redirect, Link} from "react-router-dom"
+const GOOGLE_BUTTON_ID = 'google-sign-in-button';
 
 class Login extends React.Component {
   state = {
@@ -10,10 +11,63 @@ class Login extends React.Component {
     lobbyRedirect: false
   };
 
+  componentDidMount() {
+    window.gapi.signin2.render(
+        GOOGLE_BUTTON_ID, {
+            width: 200,
+            height: 50,
+            onsuccess: this.responseGoogle,
+            onfailure: this.noresponseGoogle
+        }
+    )
+  }
+
+  noresponseGoogle(response) {
+      console.log(response);
+  }
+
+
   setRedirect = () => {
     this.setState({
         lobbyRedirect: true
     })
+  }
+
+  responseGoogle = (googleUser) => {
+
+      var id_token = googleUser.getAuthResponse().id_token;
+      var profile = googleUser.getBasicProfile();
+
+      var googleId = profile.getId()
+      var googleName = profile.getName();
+      var googleEmail = profile.getEmail();
+
+      axios.post('/registerGoogleUser', {
+          id: googleId, username: googleName, email: googleEmail
+      }).then (response => {
+        axios.post('/loginGoogleUser', {
+            id: googleId,
+            username: googleName
+        }).then((loginResponse) => {
+            console.log(loginResponse.data);
+            if(loginResponse.data !== 'bad id') {
+              console.log("successfully logged in");
+
+              localStorage.setItem('JWT', loginResponse.data.token);
+              this.setRedirect();
+              // this.renderRedirect();
+            } else {
+              console.log("Here");
+            }
+        }).catch((error) => {
+              console.error(error.message);
+        });
+
+       })
+      
+      //anything else you want to do(save to localStorage)...
+
+
   }
 
   renderRedirect = () => {
@@ -41,8 +95,8 @@ class Login extends React.Component {
         this.setRedirect();
     }).catch((error) => {
           console.error(error.response.data);
-        });
-    }
+    });
+  }
 
 
   render() {
@@ -92,19 +146,12 @@ class Login extends React.Component {
                     <div className="col-lg-6">
                       {this.renderRedirect()}
                       <button className="login-button">Sign In</button>
-                    </div>
-                    <div className="col-1" id="or">
+                      </div>
+                      <div className="col-1" id="or">
                       or
-                    </div>
-                    <div className="col-lg-5">
-                      <div
-                        className="g-signin2"
-                        id="g-button"
-                        data-onsuccess="onSignIn"
-                        data-height="45"
-                        data-width="135%"
-                      />
-                    </div>
+                      </div>
+                    {this.renderRedirect()}
+                    <div id={GOOGLE_BUTTON_ID}></div>
                   </div>
                 </form>
               </div>

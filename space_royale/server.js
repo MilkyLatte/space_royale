@@ -32,6 +32,7 @@ app.use(logger('dev'));
 app.use(passport.initialize());
 
 require("./routes/loginUser")(app);
+require("./routes/loginGoogleUser")(app);
 require("./routes/registerUser")(app);
 require("./routes/registerGoogleUser")(app);
 // require("./routes/findUser")(app);
