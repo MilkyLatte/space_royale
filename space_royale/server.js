@@ -13,6 +13,7 @@ const Cors = require('cors');
 const logger = require('morgan');
 const withAuth = require('./middleware');
 const Config = require('./config/passport');
+const jwtDecode = require('jwt-decode');
 
 
 var ships = {};
@@ -49,6 +50,7 @@ app.post('/api/world', (req, res) => {
         `I received your POST request. This is what you sent me: ${req.body.post}`,
     );
 });
+
 
 // function hashPassword(data){
 
@@ -200,30 +202,6 @@ db.close((err) => {
 })
 ///////////////////////////////////////////////////
 
-// Check if user is already in database //////////
-// function checkExist(id, db, table) {
-    
-//     let googleTable = 'SELECT EXISTS(SELECT 1 FROM ' + table + ' WHERE id =' + id + ')';
-//     let check = 'EXISTS(SELECT 1 FROM Google_User WHERE id =' + id + ')';
-    
-//     return new Promise((fulfill, reject) => {
-//         db.serialize( function() {
-//             db.each(googleTable, (err, row) => {
-//                 if (err) {
-//                     console.error(err.message);
-//                     reject(err);
-//                 };
-//                 console.log(row);
-//                 if (row[check] == 1) {
-//                     fulfill({exist:true});
-//                 } else {
-//                     fulfill({exist: false});
-//                 }
-//             });
-//         });
-//     });    
-// }
-    
 
 // // Insert user to database ///////////////////////
 // function insertGoogleUser(id, username, email) {
@@ -617,6 +595,45 @@ master.playGames();
 // Socket setup
 var io = socket(server);
 
+// Check if user is already in database //////////
+function checkStatsExist(db, column, primaryKey, origin, table) {
+    
+    let query = "SELECT EXISTS(SELECT 1 FROM " + table + " WHERE " + column + " = '" + primaryKey + "' AND  database = '" + origin +"')";
+    let check = "EXISTS(SELECT 1 FROM " + table + " WHERE " + column + " = '" + primaryKey + "' AND  database = '" + origin +"')";
+    
+    return new Promise((fulfill, reject) => {
+        db.each(query, (err, row) => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            };
+            if (row[check] == 1) {
+                fulfill({exist:true});
+            } else {
+                fulfill({exist: false});
+            }
+        });
+    });    
+}
+
+function fetchUser(db, column, id, database) {
+    let query = "SELECT id, username FROM + " + database + " WHERE " + column + " = '" + id + "'";
+
+    return new Promise((fulfill, reject) => {
+        db.each(query, (err, row) => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            };
+            if (row) {
+                fulfill({data: row});
+            } else {
+                fulfill({data: false});
+            }
+        })
+    });
+}
+
 io.on('connection', function(socket){
     console.log("Connected");
     let GAMEID;
@@ -632,10 +649,26 @@ io.on('connection', function(socket){
     };
 
     let token;
-
+    let id;
+    let database;
+    let masterDatabase;
+    let column;
 
     socket.on("choice", function(data){
-        token = data.token;
+        token = jwtDecode(data.token);
+        id = token.id;
+
+        if (token.database === 'local') {
+            database = "local"
+            masterDatabase = "Local_Users"
+            column = "username";
+        }
+        if (token.datase === 'google') {
+            database = "google"
+            masterDatabase = "Google_Users"
+            column = "id";
+        }
+        
         let added = false;
         for (let i = 0; i < master.games.length; i++){
             if (master.games[i].players.length < master.games[i].capacity){
@@ -707,6 +740,34 @@ io.on('connection', function(socket){
         master.games[GAMEID].disconnected += 1;
         console.log(stats);
 
+        if (stats.played) {
+            let db = new sqlite3.Database('./Database/game_database', (err) => {
+                if (err) {
+                    console.error(err.message);
+                    reject(err);
+                };
+            
+                console.log('Connected to database'.blue);
+            });
+    
+            checkStatsExist(db, column, id, database, "Stats")
+                .then(res => {
+                    if (!res.exist) {
+                        fetchUser(db, column, id, masterDatabase)
+                            .then(fetched => {
+
+                            });
+                    }
+                    db.close((err) => {
+                        if (err) {
+                            console.error(err.message);
+                        }
+                        console.log('Closed the database connection'.blue);
+                    })
+                }).catch(error => {
+                    console.error(error);
+                });
+        }
     });
     
     let mainLoop = setInterval(updater, 1000/100)
