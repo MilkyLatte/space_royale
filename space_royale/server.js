@@ -11,6 +11,7 @@ const passport = require('passport');
 const localstrategy = require('passport-local');
 const Cors = require('cors');
 const logger = require('morgan');
+const withAuth = require('./middleware');
 
 const Config = require('./config/passport');
 
@@ -124,6 +125,10 @@ app.get('/api/background', (req, res) => {
 
         res.send({express: base64Image});
     });
+})
+
+app.get('/checkToken', withAuth, (req, res) => {
+    res.sendStatus(200);
 })
 
 // app.post('/api/googleRegister', (req, res) => {
