@@ -3,6 +3,10 @@ import './style/Profile.css'
 
 class PlayerProfile extends React.Component{
     state = {
+        user: Juan,
+        kills: 10,
+        games: 100,
+        wins: 80,
         rockets: []
     }
 
