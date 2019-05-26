@@ -12,11 +12,17 @@ import Leaderboards from './components/Leaderboards';
 
 class App extends React.Component{
   state = {
-    loggedIn: true
+    loggedIn: false
+  }
+
+  componentDidMount(){
+    if (localStorage.getItem("JWT")) {
+      // this.setState({loggedIn: true })
+    }
   }
 
   navFunction = () => {
-    if (this.state.loggedIn) {
+    if (localStorage.getItem("JWT")) {
       return <Navbar></Navbar>
     }
   }
@@ -25,7 +31,7 @@ class App extends React.Component{
     return (
       <div>
         <BrowserRouter>
-          {this.navFunction()}
+          {/* {this.navFunction()} */}
           <span id="dot">.</span>
           <Switch>
               <Route path='/login' component={Login} />

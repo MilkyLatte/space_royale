@@ -10,18 +10,6 @@ class Login extends React.Component {
     password: "",
     lobbyRedirect: false
   };
-
-  componentDidMount() {
-    window.gapi.signin2.render(
-        GOOGLE_BUTTON_ID, {
-            width: 200,
-            height: 50,
-            onsuccess: this.responseGoogle,
-            onfailure: this.noresponseGoogle
-        }
-    )
-  }
-
   noresponseGoogle(response) {
       console.log(response);
   }
@@ -95,11 +83,29 @@ class Login extends React.Component {
         this.setRedirect();
     }).catch((error) => {
           console.error(error.response.data);
-    });
+        });
+    }
+    
+  componentDidMount() {
+    if (localStorage.getItem("JWT")) {
+      this.setRedirect()
+    }
+    window.gapi.signin2.render(
+      GOOGLE_BUTTON_ID, {
+          width: 150,
+          height: 50,
+          onsuccess: this.responseGoogle,
+          onfailure: this.noresponseGoogle
+      }
+    )
   }
 
 
   render() {
+    if(this.state.lobbyRedirect){
+      return (this.renderRedirect())
+    }
+    
     return (
       <div className="container">
       <div className="main-container">

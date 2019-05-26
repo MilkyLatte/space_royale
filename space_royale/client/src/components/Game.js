@@ -6,6 +6,7 @@ import { Vector2 } from "three";
 import io from "socket.io-client";
 import * as sizeof from "object-sizeof";
 import { Redirect } from 'react-router-dom'
+import Navbar from "./Navbar";
 
 
 class Ship {
@@ -570,6 +571,8 @@ class Game extends React.Component {
       return <Redirect  to= '/lobby'/>
     }
     return (
+      <div>
+        <Navbar></Navbar>
         <div id="gameContainer" className="container">
         {this.gameOverButtons()}
           <canvas className="gameCanvas"
@@ -583,6 +586,9 @@ class Game extends React.Component {
           />
           <p>{this.state.renderResponse.express}</p>
         </div>
+
+
+      </div>
     );
   }
 }
