@@ -80,8 +80,8 @@ class Register extends React.Component{
     }
     render() {
         return(
-            <div className="register-main-container">
-                <div className="container inner-container">
+            <div className="container register-main-container">
+                <div className="inner-container">
                     <h2>
                         Register
                     </h2>
