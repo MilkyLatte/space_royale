@@ -374,9 +374,6 @@ class Game extends React.Component {
       default:
         break;
     }
-
-    // this.game_data.ships.fast.sprites = img;
-    // this.setState({image: img})
   };
 
   loadMap = img => {
@@ -410,11 +407,7 @@ class Game extends React.Component {
   };
 
   updateGame = data => {
-    // if (this.playing){
-    //   console.log(sizeof(data));
     this.interpolate(data);
-    // }
-    // this.players = data.playersInfo;
   };
 
   dead = data => {
@@ -518,9 +511,10 @@ class Game extends React.Component {
         .then(data => this.setState({ renderResponse: data }))
         .catch(err => console.log(err));
       let loading = setInterval(() => {
-        this.drawLoading();
+        if(this.refs.canvas) {
+          this.drawLoading();
+        }
         if (this.playing) clearInterval(loading);
-        console.log("HERE");
       }, 1000/100)
       this.socket.emit("choice", { type: this.props.location.state.choice, token: localStorage.getItem('JWT') });
       this.socket.on("init", this.initGame);
@@ -530,6 +524,7 @@ class Game extends React.Component {
   }
 
   componentWillUnmount() {
+    clearInterval(this.mainUpdateLoop);
     this.playing = false;
     this.socket.disconnect();
     document.removeEventListener("keydown", this.fire, false);
@@ -573,7 +568,7 @@ class Game extends React.Component {
     }
     return (
       <div>
-        <Navbar></Navbar>
+        <Navbar inGame={true}></Navbar>
         <div id="gameContainer" className="container">
         {this.gameOverButtons()}
           <canvas className="gameCanvas"
