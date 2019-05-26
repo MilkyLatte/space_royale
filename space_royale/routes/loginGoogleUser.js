@@ -5,7 +5,7 @@ const passport = require('passport');
 
 module.exports = app => {
     app.post('/loginGoogleUser', (req, res, next) => {
-        passport.authenticate('googleLogin', (err, user, info) => {
+        passport.authenticate('GoogleLogin', (err, user, info) => {
             if (err) {
                 console.log(err);
             }
