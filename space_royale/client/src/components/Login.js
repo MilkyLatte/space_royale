@@ -76,9 +76,12 @@ class Login extends React.Component {
         username: this.state.username,
         password: this.state.password
     }).then((response) => {
+      if (response.data.auth) {
         console.log("successfully logged in");
         localStorage.setItem('JWT', response.data.token);
         this.setRedirect();
+
+      }
     }).catch((error) => {
           console.error(error.response.data);
         });
