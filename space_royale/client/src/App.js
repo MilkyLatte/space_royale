@@ -7,6 +7,7 @@ import Home from './components/Home'
 import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Register from './components/Register';
+import { PrivateRoute } from './PrivateRoute';
 
 class App extends React.Component{
   state = {
@@ -25,10 +26,10 @@ class App extends React.Component{
         <BrowserRouter>
           {this.navFunction()}
           <Switch>
-              <Route path="/login" component={Login}></Route>
-              <Route path="/game" component={Game} />
-              <Route path="/lobby" component={Lobby} />
-              <Route path="/home" component={Home} />
+              <Route path='/login' component={Login} />
+              <PrivateRoute path="/game" component={Game} />
+              <PrivateRoute path="/lobby" component={Lobby} />
+              <PrivateRoute path="/home" component={Home} />
               <Route path="/register" component={Register} />
           </Switch>
         </BrowserRouter>
