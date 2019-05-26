@@ -1,7 +1,7 @@
 import "./style/Login.css"
 import React from "react"
 import axios from "axios";
-import {Redirect} from "react-router-dom"
+import {Redirect, Link} from "react-router-dom"
 
 class Login extends React.Component {
   state = {
@@ -47,6 +47,7 @@ class Login extends React.Component {
 
   render() {
     return (
+      <div className="container">
       <div className="main-container">
         <div className="row">
           <div className="col-6">
@@ -107,9 +108,16 @@ class Login extends React.Component {
                   </div>
                 </form>
               </div>
+                <div className="col-12" id="register-here">
+                  <h4>Need an account? Register <Link to="/register">here</Link></h4>
+                </div>
             </div>
           </div>
         </div>
+      </div>
+      
+      
+      
       </div>
     );
   }

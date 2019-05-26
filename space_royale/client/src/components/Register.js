@@ -64,12 +64,12 @@ class Register extends React.Component{
                     </h2>
                     <form onSubmit={this.handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="reg-userName" className="labels">Username:</label>
-                            <input type="text" className="form-control form-control-lg" id="reg-userName" name="username" value={this.state.username} onChange={this.userNameHandle}required/>
-                        </div>
-                        <div className="form-group">
                             <label htmlFor="reg-email" className="labels">Email:</label>
                             <input type="email" className="form-control form-control-lg" id="reg-email" name="email" value={this.state.email} onChange={this.emailHandle}required />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="reg-userName" className="labels">Username:</label>
+                            <input type="text" className="form-control form-control-lg" id="reg-userName" name="username" value={this.state.username} onChange={this.userNameHandle}required/>
                         </div>
                         <div className="form-group">
                             <label htmlFor="reg-password" className="labels">Password:</label>

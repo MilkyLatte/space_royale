@@ -5,10 +5,15 @@ background: -webkit-gradient(linear, left top, right top, color-stop(0%,#87e0fd)
 }
 
 .author-message {
-    position: absolute;
-    width: 20%;
-    top: 95%;
-    left: 80%;
+    position: fixed;
+    width: 100%;
+    top: 90%;
+    left: 2%;
     font-size: 15px;
+    margin-top: 2%;
     color: white;
+}
+
+#dot {
+    color: #036e9100
 }
