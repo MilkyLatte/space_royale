@@ -137,9 +137,17 @@ app.get('/api/profile/:id/:database', (req, res) => {
     let id = req.params.id;
     let database = req.params.database;
     let column;
+    let masterDatabase;
 
-    if (database === 'local') column = 'username';
-    if (database === 'google') column = 'id';
+
+    if (database === 'local') {
+        column = 'username';
+        masterDatabase = "Local_Users";
+    }
+    if (database === 'google') {
+        column = 'id';
+        masterDatabase = "Google_Users";
+    }
 
     let db = new sqlite3.Database('./Database/game_database', sqlite3.OPEN_READONLY, (err) => {
         if (err) {
@@ -155,10 +163,67 @@ app.get('/api/profile/:id/:database', (req, res) => {
             fetchStats(db, column, id, database)
             .then(fetchRes => {
                 res.send(fetchRes);
+                db.close((err) => {
+                    if (err) {
+                        console.error(err.message);
+                    }
+                
+                    console.log('Closed the database connection'.blue);
+                })
             })
         } else {
-            res.send({wins: 0, kills: 0, games: 0, ships: [0,0,0,0]});
+            fetchUser(db, column, id, masterDatabase)
+            .then(fetchRes => {
+                res.send({username: fetchRes.data.row.username, wins: 0, kills: 0, games: 0, ships: [0,0,0,0]});
+                db.close((err) => {
+                    if (err) {
+                        console.error(err.message);
+                    }
+                
+                    console.log('Closed the database connection'.blue);
+                })
+            })
         }
+    })
+})
+
+function leaderboard(db) {
+    let query = "SELECT * FROM Stats ORDER BY wins DESC LIMIT 50"
+
+    return new Promise((fulfill, reject) => {
+        db.all(query, (err, row) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            }
+            fulfill({data: row});
+        })
+    })
+}
+
+app.get('/api/leaderboard', (req, res) => {
+    let db = new sqlite3.Database('./Database/game_database', sqlite3.OPEN_READONLY, (err) => {
+        if (err) {
+            console.error(err.message);
+        }
+    
+        console.log('Connected to the game database'.blue);
+    });
+
+    leaderboard(db)
+    .then(response => {
+        res.send(response)
+    })
+    .then(() => {
+        db.close((err) => {
+            if (err) {
+                console.error(err.message);
+            }
+            console.log('Closed the database connection'.blue);
+        })
+    })
+    .catch(err => {
+        console.error(err);
     })
 })
 // app.post('/api/googleRegister', (req, res) => {
@@ -646,7 +711,7 @@ function checkStatsExist(db, column, primaryKey, origin, table) {
 }
 
 function fetchStats(db, column, id, whichDatabase) {
-    let query = "SELECT wins, kills, games, ship1, ship2, ship3, ship4 FROM Stats WHERE " + column + " = '" + id + "' AND database = '" + whichDatabase + "'";
+    let query = "SELECT username, wins, kills, games, ship1, ship2, ship3, ship4 FROM Stats WHERE " + column + " = '" + id + "' AND database = '" + whichDatabase + "'";
 
     return new Promise((fulfill, reject) => {
         db.each(query, (err, row) => {
@@ -656,7 +721,7 @@ function fetchStats(db, column, id, whichDatabase) {
             };
 
             if (row) {
-                fulfill({wins: row.wins, kills: row.kills, games: row.games, ships: [row.ship1, row.ship2, row.ship3, row.ship4]});
+                fulfill({username: row.username, wins: row.wins, kills: row.kills, games: row.games, ships: [row.ship1, row.ship2, row.ship3, row.ship4]});
             }
         })
     })

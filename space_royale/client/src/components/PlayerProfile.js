@@ -1,6 +1,8 @@
 import React from 'react';
 import './style/Profile.css'
 import Navbar from './Navbar';
+import jwtDecode from 'jwt-decode'
+
 
 class PlayerProfile extends React.Component{
     state = {
@@ -8,7 +10,10 @@ class PlayerProfile extends React.Component{
         kills: 10,
         games: 100,
         wins: 80,
-        rockets: []
+        rockets: [],
+        ships: [],
+        database: "",
+        id: ""
     }
 
     loader = img => {
@@ -28,8 +33,26 @@ class PlayerProfile extends React.Component{
         }
     };
 
+    loadProfile = () => {
+        fetch(`api/profile/${this.state.id}/${this.state.database}`)
+        .then(res => res.json())
+        .then(data => {
+            this.state.user = data.username;
+            this.state.wins = data.wins;
+            this.state.kills = data.kills;
+            this.state.games = data.games;
+            this.state.ships = data.ships;
+        })
+        .catch(error => {
+            console.error(error);
+        })
+    }
     componentDidMount(){
+        var token = jwtDecode(localStorage.getItem('JWT'));
+        this.state.database = token.database;
+        this.state.id = token.id;
         this.loadShips();
+        this.loadProfile();
     }
     render() {
         const listItems = this.state.rockets.map((d, i) => {

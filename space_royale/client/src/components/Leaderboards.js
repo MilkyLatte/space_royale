@@ -4,30 +4,51 @@ import { Stats } from "fs";
 import "./style/Leaderboards.css"
 
 class Stat {
-    constructor(player, wins, matches, kills){
+    constructor(player, wins, games, kills, ships, playerID, database){
         this.player = player;
         this.wins = wins;
-        this.matches = matches;
+        this.games = games;
         this.kills = kills;
+        this.ships = ships;
+        this.playerID = playerID;
+        this.database = database;
     }
 }
 
 class Leaderboards extends React.Component{
     constructor (props){
         super(props);
-        this.stats = [1,3,4];
     }
+
     state = {
         stats: []
     }
-    componentDidMount(){
-        let s = []
-        for (let i = 0; i < 100; i++) {
-            let stat = new Stat("Juan", 10, 8, 7);
-            s.push(stat);
-        }
 
-        this.setState({stats: s})
+    loadTopFTY = () => {
+        let s = []
+
+        fetch('/api/leaderboard')
+        .then(res => res.json())
+        .then(response => {
+            let data = response.data;
+
+            console.log(data)
+        
+            for (let i = 0; i < data.length; i++) {
+                let stat = new Stat(data[i].username, data[i].wins, data[i].games, data[i].kills, [data[i].ship1, data[i].ship2, data[i].ship3, data[i].ship4], data[i].id, data[i].database);
+                s.push(stat);
+            }
+        })
+        .then(() => this.setState({stats: s}))
+        .catch( err => {
+            console.error(err);
+        })
+    }
+
+    componentDidMount(){
+        
+        this.loadTopFTY();
+
     }
 
     
