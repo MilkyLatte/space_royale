@@ -174,7 +174,7 @@ app.get('/api/profile/:id/:database', (req, res) => {
         } else {
             fetchUser(db, column, id, masterDatabase)
             .then(fetchRes => {
-                res.send({username: fetchRes.data.row.username, wins: 0, kills: 0, games: 0, ships: [0,0,0,0]});
+                res.send({username: fetchRes.data.username, wins: 0, kills: 0, games: 0, ships: [0,0,0,0]});
                 db.close((err) => {
                     if (err) {
                         console.error(err.message);
@@ -728,8 +728,9 @@ function fetchStats(db, column, id, whichDatabase) {
 }
 
 function fetchUser(db, column, id, database) {
+    
     let query = "SELECT id, username FROM " + database + " WHERE " + column + " = '" + id + "'";
-
+    
     return new Promise((fulfill, reject) => {
         db.each(query, (err, row) => {
             if (err) {

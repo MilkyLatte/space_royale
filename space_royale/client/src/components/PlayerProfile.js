@@ -36,6 +36,7 @@ class PlayerProfile extends React.Component{
         fetch(`api/profile/${this.state.id}/${this.state.database}`)
         .then(res => res.json())
         .then(data => {
+            console.log(data);
             this.state.user = data.username;
             this.state.wins = data.wins;
             this.state.kills = data.kills;
