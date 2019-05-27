@@ -66,7 +66,6 @@ class Game extends React.Component {
 
   getResponse = async () => {
     const response = await fetch("/api/hello");
-    // console.log(response);
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
     return body;
@@ -524,7 +523,6 @@ class Game extends React.Component {
   }
 
   componentWillUnmount() {
-    console.log("HERE");
     clearInterval(this.mainUpdateLoop);
     this.playing = false;
     this.socket.disconnect();
@@ -581,7 +579,6 @@ class Game extends React.Component {
             onMouseLeave={this.onMouseLeave}
             onKeyDown={this.fire}
           />
-          <p>{this.state.renderResponse.express}</p>
         </div>
 
 

@@ -42,22 +42,6 @@ class Navbar extends React.Component{
              <i className="fas fa-rocket" />
              <span> </span>SPACE ROYALE
            </div>
-           <button
-             className="navbar-toggler"
-             type="button"
-             data-toggle="collapse"
-             data-target="#navbarNavDropdown"
-             aria-controls="navbarNavDropdown"
-             aria-expanded="false"
-             aria-label="Toggle navigation"
-           >
-             <span className="navbar-toggler-icon" />
-           </button>
-           <div
-             className="collapse navbar-collapse"
-             id="navbarNavDropdown"
-           >
-           </div>
          </nav>
         );
 
@@ -65,7 +49,7 @@ class Navbar extends React.Component{
         
         return (
           <nav className="navbar transparent navbar-expand-lg navbar-dark bg-transparent navbar-fixed-top">
-            <Link className="navbar-brand" to="#">
+            <Link className="navbar-brand" to="/">
               <i className="fas fa-rocket" />
               <span> </span>SPACE ROYALE
             </Link>

@@ -963,7 +963,7 @@ io.on('connection', function(socket){
         }
 
         if (!added){
-            let newGame = new Game(3, master.games.length);
+            let newGame = new Game(2, master.games.length);
             newGame.playGame();
             playerID = newGame.join(socket.id, data.type);
             GAMEID = master.newGame(newGame);
