@@ -617,7 +617,7 @@ function checkStatsExist(db, column, primaryKey, origin, table) {
 }
 
 function fetchUser(db, column, id, database) {
-    let query = "SELECT id, username FROM + " + database + " WHERE " + column + " = '" + id + "'";
+    let query = "SELECT id, username FROM " + database + " WHERE " + column + " = '" + id + "'";
 
     return new Promise((fulfill, reject) => {
         db.each(query, (err, row) => {
@@ -630,6 +630,64 @@ function fetchUser(db, column, id, database) {
             } else {
                 fulfill({data: false});
             }
+        })
+    });
+}
+
+function insertUser(db, database, id, whichDatabase, username) {
+    let query = "INSERT INTO " + database + " Values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+
+    return new Promise((fulfill, reject) => {
+        db.run(query, [id, whichDatabase, username, 0,0,0,0,0,0,0], (err) => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            }
+            console.log("Added new stats to " + database + " database".blue);
+            fulfill({inserted: true});
+        })
+
+    });
+
+}
+
+function updateUser(db, column, database, id, whichDatabase, kills, choice, win) {
+
+    let ship;
+
+    let winIncrement;
+
+    switch(choice) {
+        case 0:
+            ship = 'ship1'
+            break;
+        case 1:
+            ship = 'ship2'
+            break;
+        case 2:
+            ship = 'ship3'
+            break;
+        case 3:
+            ship = 'ship4'
+            break;
+        default:
+            break;
+    }
+    
+    if (win) winIncrement = 1;
+    else winIncrement = 0;
+
+    let query = "UPDATE " + database + " SET " + ship + " = "  + ship + " + 1, kills = kills + " + kills + ", wins = wins + " + winIncrement + ", games = games + 1 WHERE " + column + " = '" + id + "' AND database = '" + whichDatabase + "'";
+
+    console.log(query);
+    return new Promise((fulfill, reject) => {
+        db.run(query, (err) => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            }
+            console.log("Update stats in " + database + " database".blue);
+            fulfill({updated: true});
         })
     });
 }
@@ -656,6 +714,7 @@ io.on('connection', function(socket){
 
     socket.on("choice", function(data){
         token = jwtDecode(data.token);
+        console.log(token); 
         id = token.id;
 
         if (token.database === 'local') {
@@ -663,12 +722,12 @@ io.on('connection', function(socket){
             masterDatabase = "Local_Users"
             column = "username";
         }
-        if (token.datase === 'google') {
+        if (token.database === 'google') {
             database = "google"
             masterDatabase = "Google_Users"
             column = "id";
-        }
-        
+        } 
+
         let added = false;
         for (let i = 0; i < master.games.length; i++){
             if (master.games[i].players.length < master.games[i].capacity){
@@ -755,18 +814,35 @@ io.on('connection', function(socket){
                     if (!res.exist) {
                         fetchUser(db, column, id, masterDatabase)
                             .then(fetched => {
-
+                                insertUser(db, "Stats", fetched.data.id, database, fetched.data.username)
+                                    .catch(insertError => {
+                                        console.error(insertError);
+                                    });
+                            })
+                            .catch(fetchError => {
+                                console.error(fetchError);
                             });
                     }
+                })
+                .then(dummy => {
+                    updateUser(db, column, "Stats", id, database, stats.kills, stats.choice, stats.win)
+                        .then(updated => {
+                            console.log(updated.updated);
+                        })
+                    
                     db.close((err) => {
                         if (err) {
                             console.error(err.message);
                         }
                         console.log('Closed the database connection'.blue);
                     })
-                }).catch(error => {
+                })
+                .catch(error => {
                     console.error(error);
-                });
+            });
+
+            
+
         }
     });
     
