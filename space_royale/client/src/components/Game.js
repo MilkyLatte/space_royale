@@ -567,10 +567,15 @@ class Game extends React.Component {
     }
     return (
       <div>
-        <Navbar inGame={true}></Navbar>
+        <Navbar inGame={true} />
         <div id="gameContainer" className="container">
-        {this.gameOverButtons()}
-          <canvas className="gameCanvas"
+          {this.gameOverButtons()}
+          <h3>
+            Hover on the screen to move the ship and press SPACE to shoot
+          </h3>
+
+          <canvas
+            className="gameCanvas"
             ref="canvas"
             width={this.game_data.canvas.width}
             height={this.game_data.canvas.height}
@@ -580,8 +585,6 @@ class Game extends React.Component {
             onKeyDown={this.fire}
           />
         </div>
-
-
       </div>
     );
   }
