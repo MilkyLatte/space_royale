@@ -11,9 +11,7 @@ class PlayerProfile extends React.Component{
         games: 100,
         wins: 80,
         rockets: [],
-        ships: [],
-        database: "",
-        id: ""
+        ships: []
     }
 
     loader = img => {
@@ -33,16 +31,18 @@ class PlayerProfile extends React.Component{
         }
     };
 
-    loadProfile = () => {
-        fetch(`api/profile/${this.state.id}/${this.state.database}`)
+    loadProfile = (id, database) => {
+        fetch(`api/profile/${id}/${database}`)
         .then(res => res.json())
         .then(data => {
             console.log(data);
-            this.state.user = data.username;
-            this.state.wins = data.wins;
-            this.state.kills = data.kills;
-            this.state.games = data.games;
-            this.state.ships = data.ships;
+            this.setState({
+                user: data.username,
+                wins: data.wins,
+                kills: data.kills,
+                games: data.games,
+                ships: data.ships
+            });
         })
         .catch(error => {
             console.error(error);
@@ -50,10 +50,8 @@ class PlayerProfile extends React.Component{
     }
     componentDidMount(){
         var token = jwtDecode(localStorage.getItem('JWT'));
-        this.state.database = token.database;
-        this.state.id = token.id;
         this.loadShips();
-        this.loadProfile();
+        this.loadProfile(token.id, token.database);
     }
     render() {
         const listItems = this.state.rockets.map((d, i) => {

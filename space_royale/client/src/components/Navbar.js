@@ -1,18 +1,39 @@
 import React from 'react';
 import "./style/Navbar.css";
 import {Link, Redirect} from "react-router-dom";
+import jwtDecode from 'jwt-decode';
 
 
 class Navbar extends React.Component{
     state = {
-      loggedOut: false
+      loggedOut: false,
+      username: ""
     }
+
     logout = () => {
       this.setState({loggedOut: true})
 
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        console.log('User signed out.');
+        Authenticate.signOutUser();
+      });
+      
       console.log(localStorage.removeItem('JWT'));
     }
     
+    componentDidMount() {
+      let token = jwtDecode(localStorage.getItem('JWT'));
+
+      fetch(`api/username/${token.id}/${token.database}`)
+      .then(res => res.json())
+      .then(username => {
+        this.setState({username: username.username})
+      })
+      .catch(err => console.error(err));
+      
+    }
+
     render(){
       if (this.state.loggedOut) {
         return (
@@ -89,7 +110,7 @@ class Navbar extends React.Component{
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    Username
+                    {this.state.username}
                   </Link>
                   <div
                     className="dropdown-menu"

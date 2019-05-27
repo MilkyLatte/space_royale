@@ -132,6 +132,36 @@ app.get('/checkToken', withAuth, (req, res) => {
     res.sendStatus(200);
 })
 
+app.get('/api/username/:id/:database', (req, res) => {
+    let id = req.params.id;
+    let database = req.params.database;
+
+    if (database === 'local') {
+        res.send({username: id});
+    }
+    if (database === 'google') {
+        let db = new sqlite3.Database('./Database/game_database', sqlite3.OPEN_READONLY, (err) => {
+            if (err) {
+                console.error(err.message);
+            }
+        
+            console.log('Connected to the game database'.blue);
+        });
+    
+        fetchUser(db, "id", id, "Google_Users")
+        .then(fetchRes => {
+            res.send({username:fetchRes.data.username});
+        })
+        .then(() => {
+            db.close((err) => {
+                if (err) {
+                    console.error(err.message);
+                }
+                console.log('Closed the database connection'.blue);
+            })
+        });
+    }
+})
 
 app.get('/api/profile/:id/:database', (req, res) => {
     let id = req.params.id;
