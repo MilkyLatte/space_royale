@@ -1,5 +1,6 @@
 const User = require('../sequelize/googleSequelize');
 const passport = require('passport');
+const sqlite3 = require('sqlite3').verbose();
 
 module.exports = app => {
     app.post('/registerGoogleUser', (req, res, next) => {
@@ -27,12 +28,15 @@ module.exports = app => {
                             username: data.username,
                             email: data.email,
                         })
-                    }). then(() => {
+                    }).then(() => {
                         console.log('user created in db');
                         res.status(200).send({message: 'user created'});
                     })
+                    .catch((err) => {
+                        console.error(err)
+                    })                        
                 })
             }
-        }) (req, res, next);
+        }) (req, res, next)
     })
 }

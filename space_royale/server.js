@@ -132,6 +132,35 @@ app.get('/checkToken', withAuth, (req, res) => {
     res.sendStatus(200);
 })
 
+
+app.get('/api/profile/:id/:database', (req, res) => {
+    let id = req.params.id;
+    let database = req.params.database;
+    let column;
+
+    if (database === 'local') column = 'username';
+    if (database === 'google') column = 'id';
+
+    let db = new sqlite3.Database('./Database/game_database', sqlite3.OPEN_READONLY, (err) => {
+        if (err) {
+            console.error(err.message);
+        }
+    
+        console.log('Connected to the game database'.blue);
+    });
+    
+    checkStatsExist(db, column, id, database, "Stats")
+    .then(checkRes => {
+        if (checkRes.exist) {
+            fetchStats(db, column, id, database)
+            .then(fetchRes => {
+                res.send(fetchRes);
+            })
+        } else {
+            res.send({wins: 0, kills: 0, games: 0, ships: [0,0,0,0]});
+        }
+    })
+})
 // app.post('/api/googleRegister', (req, res) => {
 //     const { id, username, email } = req.body;
     
@@ -616,6 +645,23 @@ function checkStatsExist(db, column, primaryKey, origin, table) {
     });    
 }
 
+function fetchStats(db, column, id, whichDatabase) {
+    let query = "SELECT wins, kills, games, ship1, ship2, ship3, ship4 FROM Stats WHERE " + column + " = '" + id + "' AND database = '" + whichDatabase + "'";
+
+    return new Promise((fulfill, reject) => {
+        db.each(query, (err, row) => {
+            if (err) {
+                console.err(err.message);
+                reject(err)
+            };
+
+            if (row) {
+                fulfill({wins: row.wins, kills: row.kills, games: row.games, ships: [row.ship1, row.ship2, row.ship3, row.ship4]});
+            }
+        })
+    })
+}
+
 function fetchUser(db, column, id, database) {
     let query = "SELECT id, username FROM " + database + " WHERE " + column + " = '" + id + "'";
 
@@ -813,36 +859,43 @@ io.on('connection', function(socket){
                 .then(res => {
                     if (!res.exist) {
                         fetchUser(db, column, id, masterDatabase)
-                            .then(fetched => {
-                                insertUser(db, "Stats", fetched.data.id, database, fetched.data.username)
-                                    .catch(insertError => {
-                                        console.error(insertError);
-                                    });
+                        .then(fetched => {
+                            insertUser(db, "Stats", fetched.data.id, database, fetched.data.username)
+                            .then(() => {
+                                updateUser(db, column, "Stats", id, database, stats.kills, stats.choice, stats.win)
+                                .then(updated => {
+                                    console.log(updated.updated);
+                                })
+                                db.close((err) => {
+                                    if (err) {
+                                        console.error(err.message);
+                                    }
+                                    console.log('Closed the database connection'.blue);
+                                })
                             })
-                            .catch(fetchError => {
-                                console.error(fetchError);
+                            .catch(insertError => {
+                                console.error(insertError);
                             });
-                    }
-                })
-                .then(dummy => {
-                    updateUser(db, column, "Stats", id, database, stats.kills, stats.choice, stats.win)
+                        })
+                        .catch(fetchError => {
+                            console.error(fetchError);
+                        });
+                    } else {
+                        updateUser(db, column, "Stats", id, database, stats.kills, stats.choice, stats.win)
                         .then(updated => {
                             console.log(updated.updated);
                         })
-                    
-                    db.close((err) => {
-                        if (err) {
-                            console.error(err.message);
-                        }
-                        console.log('Closed the database connection'.blue);
-                    })
+                        db.close((err) => {
+                            if (err) {
+                                console.error(err.message);
+                            }
+                            console.log('Closed the database connection'.blue);
+                        })
+                    }
                 })
                 .catch(error => {
                     console.error(error);
-            });
-
-            
-
+                });
         }
     });
     

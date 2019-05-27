@@ -30,10 +30,11 @@ passport.use(
                         return done(null, false, {message: 'username already taken'});
                     } else {
                         bcrypt.hash(userpassword, saltRounds).then(hashedPassword => {
-                            User.create({username, password: hashedPassword}).then(user => {
-                                console.log("user created");
-                                return done(null, user);
-                            })
+                            User.create({username, password: hashedPassword})
+                                .then(user => {
+                                    console.log("user created");
+                                    return done(null, user);
+                                })
                         })
                     }
                 })
