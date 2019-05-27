@@ -113,7 +113,7 @@ class Navbar extends React.Component{
                     <Link className="dropdown-item" to="/player">
                       View Profile
                     </Link>
-                    <Link className="dropdown-item" to="#">
+                    <Link className="dropdown-item" to="/settings">
                       Account Settings
                     </Link>
                     <button className="dropdown-item" to="#" onClick={this.logout}> 

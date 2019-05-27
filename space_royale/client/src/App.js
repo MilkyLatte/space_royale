@@ -11,6 +11,7 @@ import { PrivateRoute } from './PrivateRoute';
 import Leaderboards from './components/Leaderboards';
 import withAuth from './withAuth';
 import PlayerProfile from './components/PlayerProfile';
+import DeleteAccount from './components/DeleteAccount';
 
 
 class App extends React.Component{
@@ -35,9 +36,13 @@ class App extends React.Component{
               <Route path="/lobby" component={withAuth(Lobby)} />
               <Route path="/home" component={withAuth(Home)} />
               <Route path="/register" component={Register} />
+              <Route path="/" exact component={withAuth(Lobby)} />
               <Route path="/leaderboards" component={withAuth(Leaderboards)} />
               <Route path="/player" component={withAuth(PlayerProfile)}/>
               <Route path="/showplayer" component={withAuth(PlayerProfile)}/>
+              <Route path="/settings" component={withAuth(DeleteAccount)}></Route>
+              <Route path="*" component={withAuth(Lobby)} />
+
           </Switch>
         </BrowserRouter>
 
