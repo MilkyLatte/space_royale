@@ -524,6 +524,7 @@ class Game extends React.Component {
   }
 
   componentWillUnmount() {
+    console.log("HERE");
     clearInterval(this.mainUpdateLoop);
     this.playing = false;
     this.socket.disconnect();

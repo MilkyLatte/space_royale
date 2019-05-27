@@ -10,6 +10,7 @@ import Register from './components/Register';
 import { PrivateRoute } from './PrivateRoute';
 import Leaderboards from './components/Leaderboards';
 import withAuth from './withAuth';
+import PlayerProfile from './components/PlayerProfile';
 
 
 class App extends React.Component{
@@ -35,6 +36,7 @@ class App extends React.Component{
               <Route path="/home" component={withAuth(Home)} />
               <Route path="/register" component={Register} />
               <Route path="/leaderboards" component={withAuth(Leaderboards)} />
+              <Route path="/player" component={withAuth(PlayerProfile)}/>
           </Switch>
         </BrowserRouter>
 
