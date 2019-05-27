@@ -2,9 +2,16 @@ import React from 'react';
 import './style/Profile.css'
 import Navbar from './Navbar';
 import jwtDecode from 'jwt-decode'
+import { Stats } from 'fs';
 
 
 class PlayerProfile extends React.Component{
+    constructor(props) {
+        super(props);
+        this.token = jwtDecode(
+                      localStorage.getItem("JWT")
+                    );
+    }
     state = {
         user: "Juan",
         kills: 10,
@@ -37,32 +44,39 @@ class PlayerProfile extends React.Component{
         fetch(`api/profile/${this.state.id}/${this.state.database}`)
         .then(res => res.json())
         .then(data => {
-            console.log(data);
-            this.state.user = data.username;
-            this.state.wins = data.wins;
-            this.state.kills = data.kills;
-            this.state.games = data.games;
-            this.state.ships = data.ships;
+            this.setState({
+                user: data.username,
+                wins: data.wins,
+                kills: data.kills,
+                games: data.games,
+                ships: data.ships
+            })
         })
         .catch(error => {
             console.error(error);
         })
     }
     componentDidMount(){
-        var token = jwtDecode(localStorage.getItem('JWT'));
-        this.state.database = token.database;
-        this.state.id = token.id;
+        if (this.props.location.state){
+            let stat = this.props.location.state.stat;
+            this.setState({ user: stat.player, wins: stat.wins, games: stat.games, ships: stat.ships, kills: stat.kills})
+        } else {
+            this.setState({
+                database: this.token.database,
+                id: this.token.id
+            })
+            console.log(this.state.database);
+            this.loadProfile();
+        }
         this.loadShips();
-        this.loadProfile();
     }
     render() {
         const listItems = this.state.rockets.map((d, i) => {
             return (
-                <div className="col-6 show-overlayed" id={i*99}>
+                <div className="col-6 show-overlayed" key={i}>
                     <div className="overlayed">
-                        <h3>1000</h3>
+                        <h3 id={i*1000}>{this.state.ships[i]}</h3>
                     </div>
-
                     <img src={d} alt="" className="stat-image"/>
                 </div>
             )
@@ -112,19 +126,19 @@ class PlayerProfile extends React.Component{
                                         <div className="col-4 stat">
 
                                             <h3>
-                                                <i class="fas fa-gamepad"></i>
+                                                <i className="fas fa-gamepad"></i>
                                                 {this.state.games}
                                             </h3>
                                         </div>
                                         <div className="col-4 stat">
                                             <h3>
-                                                <i class="fas fa-trophy"></i>
+                                                <i className="fas fa-trophy"></i>
                                                 {this.state.wins}
                                             </h3>
                                         </div>
                                         <div className="col-4 stat">
                                             <h3>
-                                                <i class="fas fa-skull-crossbones"></i>
+                                                <i className="fas fa-skull-crossbones"></i>
                                                 {this.state.kills}
                                             </h3>
                                         </div>
