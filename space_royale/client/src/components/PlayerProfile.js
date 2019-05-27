@@ -8,6 +8,9 @@ import { Stats } from 'fs';
 class PlayerProfile extends React.Component{
     constructor(props) {
         super(props);
+        this.token = jwtDecode(
+                      localStorage.getItem("JWT")
+                    );
     }
     state = {
         user: "Juan",
@@ -35,10 +38,11 @@ class PlayerProfile extends React.Component{
         }
     };
 
-    loadProfile = (id, database) => {
-        fetch(`api/profile/${id}/${database}`)
+    loadProfile = () => {
+        fetch(`api/profile/${this.token.id}/${this.token.database}`)
         .then(res => res.json())
         .then(data => {
+            console.log(data);
             this.setState({
                 user: data.username,
                 wins: data.wins,
@@ -56,9 +60,11 @@ class PlayerProfile extends React.Component{
             let stat = this.props.location.state.stat;
             this.setState({ user: stat.player, wins: stat.wins, games: stat.games, ships: stat.ships, kills: stat.kills})
         } else {
-            var token = jwtDecode(localStorage.getItem("JWT"));
-            console.log(this.state.database);
-            this.loadProfile(token.id, token.database);
+            this.setState({
+                database: this.token.database,
+                id: this.token.id
+            })
+            this.loadProfile();
         }
         this.loadShips();
     }

@@ -11,13 +11,7 @@ class Navbar extends React.Component{
     }
 
     logout = () => {
-      this.setState({loggedOut: true})
-
-      // var auth2 = gapi.auth2.getAuthInstance();
-      // auth2.signOut().then(function () {
-      //   console.log('User signed out.');
-      //   Authenticate.signOutUser();
-      // });
+      this.setState({loggedOut: true});
 
       console.log(localStorage.removeItem('JWT'));
     }

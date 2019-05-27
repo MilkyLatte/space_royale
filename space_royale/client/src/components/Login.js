@@ -8,7 +8,8 @@ class Login extends React.Component {
   state = {
     username: "",
     password: "",
-    lobbyRedirect: false
+    lobbyRedirect: false,
+    googleClicked: false
   };
   noresponseGoogle(response) {
       console.log(response);
@@ -21,9 +22,15 @@ class Login extends React.Component {
     })
   }
 
-  responseGoogle = (googleUser) => {
+  handleClick = () => {
+    this.setState({
+      googleClicked: true
+    })
+  }
 
-      var id_token = googleUser.getAuthResponse().id_token;
+  responseGoogle = (googleUser) => {
+    if (this.state.googleClicked) {
+      
       var profile = googleUser.getBasicProfile();
 
       var googleId = profile.getId()
@@ -51,6 +58,7 @@ class Login extends React.Component {
 
        })
       
+    }
       //anything else you want to do(save to localStorage)...
 
 
@@ -159,7 +167,7 @@ class Login extends React.Component {
                       </div>
                       {this.renderRedirect()}
                       <div className="col-lg-5 col-sm-12" id="g-button">
-                        <div id={GOOGLE_BUTTON_ID} />
+                        <div id={GOOGLE_BUTTON_ID} onClick={this.handleClick}/>
                       </div>
                     </div>
                   </form>
