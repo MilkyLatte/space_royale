@@ -186,6 +186,46 @@ app.get('/api/profile/:id/:database', (req, res) => {
         }
     })
 })
+
+function leaderboard(db) {
+    let query = "SELECT * FROM Stats ORDER BY wins DESC LIMIT 50"
+
+    return new Promise((fulfill, reject) => {
+        db.all(query, (err, row) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            }
+            fulfill({data: row});
+        })
+    })
+}
+
+app.get('/api/leaderboard', (req, res) => {
+    let db = new sqlite3.Database('./Database/game_database', sqlite3.OPEN_READONLY, (err) => {
+        if (err) {
+            console.error(err.message);
+        }
+    
+        console.log('Connected to the game database'.blue);
+    });
+
+    leaderboard(db)
+    .then(response => {
+        res.send(response)
+    })
+    .then(() => {
+        db.close((err) => {
+            if (err) {
+                console.error(err.message);
+            }
+            console.log('Closed the database connection'.blue);
+        })
+    })
+    .catch(err => {
+        console.error(err);
+    })
+})
 // app.post('/api/googleRegister', (req, res) => {
 //     const { id, username, email } = req.body;
     

@@ -10,6 +10,7 @@ class PlayerProfile extends React.Component{
         games: 100,
         wins: 80,
         rockets: [],
+        ships: [],
         database: "",
         id: ""
     }
@@ -39,7 +40,7 @@ class PlayerProfile extends React.Component{
             this.state.wins = data.wins;
             this.state.kills = data.kills;
             this.state.games = data.games;
-            this.state.rockets = data.ships;
+            this.state.ships = data.ships;
         })
         .catch(error => {
             console.error(error);
