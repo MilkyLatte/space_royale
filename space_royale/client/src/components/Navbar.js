@@ -95,7 +95,7 @@ class Navbar extends React.Component{
                     className="dropdown-menu"
                     aria-labelledby="navbarDropdownMenuLink"
                   >
-                    <Link className="dropdown-item" to="#">
+                    <Link className="dropdown-item" to="/player">
                       View Profile
                     </Link>
                     <Link className="dropdown-item" to="#">

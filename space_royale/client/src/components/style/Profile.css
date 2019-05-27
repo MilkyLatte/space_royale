@@ -1,0 +1,88 @@
+.stat-image {
+    height: 100%;
+    max-height: 150px;
+
+}
+
+.player-container {
+    margin-top: 10%;
+    height: 80%;
+    width: 100%;
+    max-width: 1000px;
+    border-radius: 10px;
+    background-color: rgb(248, 248, 248);
+    -webkit-box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    -moz-box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    margin-bottom: 12%;
+}
+
+.left-row-player {
+    margin-top: 10%;
+    margin-bottom: 10%;
+    border-right: 1px solid rgb(214, 214, 214); 
+}
+
+#left-player {
+    text-align: center;
+}
+
+.overlayed {
+    height: 50%;
+    width: 60%;
+    left: 20%;
+    top: 30%;
+    visibility: hidden;
+    opacity: 0;
+    background-color: rgba(206, 206, 206, 0.767);
+    position: absolute;
+    text-align: center;
+    border-radius: 10px;
+    transition: opacity 200ms linear 0s;
+    -webkit-box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    -moz-box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+    box-shadow: -3px 5px 40px 0px rgba(0,0,0,0.6);
+}
+
+.show-overlayed:hover .overlayed{
+    visibility: visible;
+    opacity: 1;
+}
+
+.overlayed h3 {
+    padding-top: 20%;
+    font-weight: bold;
+}
+
+.right-player-container {
+    margin-top: 5%;
+}
+
+.right-player-container h2{
+    font-size: 5rem;
+}
+
+.stat-title h3 {
+    font-size: 2.7rem;
+}
+
+.stat {
+    padding-right: 12%;
+}
+
+.stat h3 {
+    font-size: 2rem;
+    text-align: right;
+}
+
+.stat i {
+    padding-right: 20%;
+}
+
+#playerName {
+    border-bottom: 1px solid rgba(214, 214, 214, 0.76); 
+}
+
+#stats-container{
+    margin-top: 3%;
+}
