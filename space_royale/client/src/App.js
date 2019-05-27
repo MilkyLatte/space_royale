@@ -37,6 +37,7 @@ class App extends React.Component{
               <Route path="/register" component={Register} />
               <Route path="/leaderboards" component={withAuth(Leaderboards)} />
               <Route path="/player" component={withAuth(PlayerProfile)}/>
+              <Route path="/showplayer" component={withAuth(PlayerProfile)}/>
           </Switch>
         </BrowserRouter>
 
