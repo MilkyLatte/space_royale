@@ -1,5 +1,6 @@
 import React from 'react';
 import './style/Profile.css'
+import Navbar from './Navbar';
 
 class PlayerProfile extends React.Component{
     state = {
@@ -44,71 +45,74 @@ class PlayerProfile extends React.Component{
         })
 
         return(
-            <div className="container player-container">
-                <div className="row">
-                    <div className="col-4">
-                        <div className="row left-row-player">
-                            <div className="col-12">
-                                <h3 id="left-player">
-                                    Games per ship
-                                </h3>
-                            </div>
-                            {listItems}
-                        </div>
-                    </div>
-                    <div className="col-8">
-                        <div className="container right-player-container">
-                            <div className="row">
-                                <div className="col-12 " id="playerName">
-                                    <h2>
-                                        {this.state.user}
-                                    </h2>
+            <div>
+                <Navbar></Navbar>
+                <div className="container player-container">
+                    <div className="row">
+                        <div className="col-4">
+                            <div className="row left-row-player">
+                                <div className="col-12">
+                                    <h3 id="left-player">
+                                        Games per ship
+                                    </h3>
                                 </div>
-                                <div className="row container" id="stats-container">
-
-                                    <div className="col-4 stat-title">
-                                        <h3>
-                                            Games Played
-
-                                        </h3>
-                                    </div>
-                                    <div className="col-4 stat-title">
-                                        <h3>
-                                            Total Victories
-                                        </h3>
-                                    </div>
-                                    <div className="col-4 stat-title">
-                                        <h3>
-                                            Career Kills
-                                        </h3>
-                                    </div>
-                                    <div className="col-4 stat">
-
-                                        <h3>
-                                            <i class="fas fa-gamepad"></i>
-                                            {this.state.games}
-                                        </h3>
-                                    </div>
-                                    <div className="col-4 stat">
-                                        <h3>
-                                            <i class="fas fa-trophy"></i>
-                                            {this.state.wins}
-                                        </h3>
-                                    </div>
-                                    <div className="col-4 stat">
-                                        <h3>
-                                            <i class="fas fa-skull-crossbones"></i>
-                                            {this.state.kills}
-                                        </h3>
-                                    </div>
-
-                                </div>
-     
+                                {listItems}
                             </div>
                         </div>
+                        <div className="col-8">
+                            <div className="container right-player-container">
+                                <div className="row">
+                                    <div className="col-12 " id="playerName">
+                                        <h2>
+                                            {this.state.user}
+                                        </h2>
+                                    </div>
+                                    <div className="row container" id="stats-container">
+
+                                        <div className="col-4 stat-title">
+                                            <h3>
+                                                Games Played
+
+                                            </h3>
+                                        </div>
+                                        <div className="col-4 stat-title">
+                                            <h3>
+                                                Total Victories
+                                            </h3>
+                                        </div>
+                                        <div className="col-4 stat-title">
+                                            <h3>
+                                                Career Kills
+                                            </h3>
+                                        </div>
+                                        <div className="col-4 stat">
+
+                                            <h3>
+                                                <i class="fas fa-gamepad"></i>
+                                                {this.state.games}
+                                            </h3>
+                                        </div>
+                                        <div className="col-4 stat">
+                                            <h3>
+                                                <i class="fas fa-trophy"></i>
+                                                {this.state.wins}
+                                            </h3>
+                                        </div>
+                                        <div className="col-4 stat">
+                                            <h3>
+                                                <i class="fas fa-skull-crossbones"></i>
+                                                {this.state.kills}
+                                            </h3>
+                                        </div>
+
+                                    </div>
+        
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
-
             </div>
         )
     }
