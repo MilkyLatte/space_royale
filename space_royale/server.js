@@ -37,7 +37,6 @@ require("./routes/loginGoogleUser")(app);
 require("./routes/registerUser")(app);
 require("./routes/registerGoogleUser")(app);
 // require("./routes/findUser")(app);
-// require("./routes/deleteUser")(app);
 // require("./routes/updateUser")(app);
 
 
@@ -50,6 +49,85 @@ app.post('/api/world', (req, res) => {
         `I received your POST request. This is what you sent me: ${req.body.post}`,
     );
 });
+
+app.get('/deleteUser/:id/:database', (req, res) => {
+    let database = req.params.database;
+    let id = req.params.id;
+
+    let column;
+    let masterDatabase;
+
+    if (database === 'local') {
+        masterDatabase = 'Local_Users';
+        column = "username"
+    }
+
+    if (database === 'google') {
+        masterDatabase = 'Google_Users';
+        column = "id"
+    }
+
+    let db = new sqlite3.Database('./Database/game_database', (err) => {
+        if (err) {
+            console.error(err.message);
+        }
+    
+        console.log('Connected to the game database'.blue);
+    });
+    
+    deleteUser(db, masterDatabase, id, column)
+    .then(response => {
+        if (response.deleted) {
+            deleteStats(db, database, id, column)
+            .then(statsResponse => {
+                res.send({deleted: true});
+            })
+            .then(() => {
+                db.close((err) => {
+                    if (err) {
+                        console.error(err.message);
+                    }
+                    console.log('Closed the database connection'.blue);
+                })
+            })
+        }
+    })
+    .catch(err => {
+      console.error(err);  
+    })
+    
+});
+
+function deleteStats(db, whichDatabase, id, column) {
+    let statQuery = "DELETE FROM Stats WHERE database = '" + whichDatabase + "' AND " + column + " = '" + id + "'";
+
+    return new Promise((fulfill, reject) => {
+        db.run(statQuery, (err) => {
+            if (err) {
+                console.error("Error at Stats deletion");
+                console.error(err.message);
+                reject(err);
+            }
+            console.log("Deleted user from Stats database".blue);
+            fulfill({deleted:true});
+        })
+    })
+}
+
+function deleteUser(db, masterDatabase, id, column) {
+    let userQuery = "DELETE FROM " + masterDatabase + " WHERE " + column + " = '" + id + "'";
+    return new Promise((fulfill, reject) => {
+        db.run(userQuery, (err) => {
+            if (err) {
+                console.error("Error at User deletion");
+                console.error(err.message);
+                reject(err);
+            }
+            console.log("Deleted user from user database".blue);
+            fulfill({deleted: true});
+        })
+    })
+}
 
 // function hashPassword(data){
 

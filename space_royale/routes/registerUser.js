@@ -1,3 +1,6 @@
+// Origin from https://github.com/paigen11/mysql-registration-passport
+// Modified for this project
+
 const User = require('../sequelize/sequelize');
 const passport = require('passport');
 

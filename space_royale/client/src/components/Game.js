@@ -50,7 +50,7 @@ class Game extends React.Component {
     this.mouse = new Vector2(50, 100);
     this.change = false;
     this.playerNumber = 0;
-    this.socket = io.connect("http://192.168.0.44:5000");
+    this.socket = io.connect("http://localhost:5000");
     this.gameId = 0;
     this.gameOver = false;
     this.unmounted = false;

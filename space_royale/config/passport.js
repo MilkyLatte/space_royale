@@ -1,3 +1,6 @@
+// Followed tutorial from https://itnext.io/implementing-json-web-tokens-passport-js-in-a-javascript-application-with-react-b86b1f313436
+// Modified for this project
+
 const jwtSecret = require('./jwtConfig');
 const bcrypt = require('bcrypt');
 
@@ -146,26 +149,3 @@ const opts = {
     jwtFromRequest: ExtractJWT.fromAuthHeaderWithScheme('JWT'),
     secretOrKey: jwtSecret.secret,
 };
-
-passport.use(
-    'jwt',
-    new JWTstrategy(opts, (jwt_payload, done) => {
-        try {
-            User.findOne({
-                where: {
-                    username: jwt_payload.id,
-                },
-            }).then(user => {
-                if (user) {
-                    console.log('user found in db in passport');
-                    done(null, user);
-                } else {
-                    console.log('user not found in db');
-                    done(null, false);
-                }
-            });
-        } catch (err) {
-            done(err);
-        }
-    })
-);

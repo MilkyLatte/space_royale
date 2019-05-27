@@ -1,6 +1,8 @@
+// Followed tutorial from https://itnext.io/implementing-json-web-tokens-passport-js-in-a-javascript-application-with-react-b86b1f313436
+// Modified for this project
+
 const User = require('../sequelize/googleSequelize');
 const passport = require('passport');
-const sqlite3 = require('sqlite3').verbose();
 
 module.exports = app => {
     app.post('/registerGoogleUser', (req, res, next) => {
