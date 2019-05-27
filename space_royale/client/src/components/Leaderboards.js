@@ -65,7 +65,7 @@ class Leaderboards extends React.Component{
                         <h4>{d.wins}</h4>
                     </div>
                     <div className="col-2 l-object">
-                        <h4>{d.matches}</h4>
+                        <h4>{d.games}</h4>
                     </div>
                     <div className="col-2 l-object">
                         <h4>{d.kills}</h4>
