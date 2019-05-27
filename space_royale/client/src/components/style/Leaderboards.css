@@ -1,6 +1,9 @@
 .top-l-row{
     height: 100px;
-    background-image: linear-gradient(to right, #d3d3d3e5 0%, #b3b3b3a2 74%);
+    /* background-image: linear-gradient(to right, #d3d3d3e5 0%, #b3b3b3a2 74%); */
+    background-color: rgb(70, 70, 70);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 
 }
 
@@ -13,7 +16,8 @@
 
 .top-name h3 {
     font-size: 2.5rem;
-    font-weight: 600;
+    color: rgb(219, 219, 219);
+
 }
 
 .top-object {
@@ -21,7 +25,8 @@
 }
 .top-object h4 {
     font-size: 2.5rem;
-    font-weight: 600;
+    color: rgb(219, 219, 219);
+
 }
 
 
