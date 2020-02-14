@@ -28,7 +28,7 @@
     "socket.io": "^2.2.0",
     "sqlite3": "^4.0.8",
     "three.js": "^0.77.1",
-    "yarn": "^1.16.0"
+    "yarn": "^1.22.0"
   },
   "devDependencies": {
     "concurrently": "^4.1.0"
