@@ -1,4 +1,6 @@
-# space_royale
+# Space Royale : Online 1v1 Spaceship Shooter
+
+## How to deploy
 
 To run both the server and the client, follow these steps:
 
@@ -12,4 +14,6 @@ To run both the server and the client, follow these steps:
 8. run nodemon server.js
 9. Open a new terminal. Go to client directory.
 10. run npm start
+
+
                       
