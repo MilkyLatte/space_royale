@@ -1,5 +1,5 @@
 # Space Royale : Online 1 v 1 Spaceship Shooter
-This project is done during Year 3 of Computer Science undergraduate course at University of Bristol for an assignment.
+This project is done during Year 3 of Computer Science undergraduate course at University of Bristol for Web Technologies assignment.
 ## How to deploy
 
 To run both the server and the client, follow these steps:
