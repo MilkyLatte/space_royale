@@ -36,7 +36,7 @@ From here, you can either login with a google account or by creating an account 
 </p>
 
 ### Spaceship selection
-There are four types of spaceships you can choose. Each has a different health, speed and a number of weapons. 
+There are four types of spaceships you can choose. Each has a different health, speed and a firepower. 
 
 <p align="center">
   <img src="https://github.com/MilkyLatte/space_royale/blob/master/Images/ship_selection.gif" height="300" title="Ship Selection">
